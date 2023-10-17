@@ -19,6 +19,7 @@ public class Host {
     private String firstName;
     private List<Phone> phone;
     private List<Email> email;
+    private Address address;
     private int beds;
     private boolean crib;
     private boolean fullBath;

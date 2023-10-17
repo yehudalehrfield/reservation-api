@@ -15,6 +15,7 @@ public class HostService {
     HostRepository hostRepository;
 
     public Host createHost(Host host){
+        if (isExistingHost(host)) return null;
         return hostRepository.insert(host);
     }
 
@@ -27,5 +28,10 @@ public class HostService {
         hostRepository.deleteById(id);
         return deletedHost;
 
+    }
+
+    public boolean isExistingHost(Host host){
+        Optional<Host> existingHost = hostRepository.findByLastNameAndAddress(host.getLastName(), host.getAddress());
+        return existingHost.isPresent();
     }
 }
