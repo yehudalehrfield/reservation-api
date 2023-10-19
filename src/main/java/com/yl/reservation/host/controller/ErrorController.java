@@ -11,6 +11,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class ErrorController {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<String> handleException(HttpMessageNotReadableException exception, HttpServletRequest request) {
-        return new ResponseEntity(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }

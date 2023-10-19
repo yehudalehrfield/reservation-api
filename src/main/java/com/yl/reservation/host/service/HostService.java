@@ -27,11 +27,24 @@ public class HostService {
         Optional<Host> deletedHost = hostRepository.findById(id);
         hostRepository.deleteById(id);
         return deletedHost;
+    }
 
+    public Host updateHost(Host host) {
+        String hostId = host.getId();
+        if (hostId == null) {
+            Optional<Host> hostToUpdate = hostRepository.findByLastNameAndAddress(host.getLastName(), host.getAddress());
+            if (hostToUpdate.isPresent()) hostId = hostToUpdate.get().getId();
+        }
+        return (hostId == null) ? null :  hostRepository.save(host);
     }
 
     public boolean isExistingHost(Host host){
         Optional<Host> existingHost = hostRepository.findByLastNameAndAddress(host.getLastName(), host.getAddress());
         return existingHost.isPresent();
+    }
+
+    public Host getHostById(String id) {
+        Optional<Host> host = hostRepository.findById(id);
+        return host.orElse(null);
     }
 }
