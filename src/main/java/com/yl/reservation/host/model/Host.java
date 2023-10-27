@@ -21,10 +21,12 @@ public class Host {
     private List<Email> email;
     private Address address;
     private int beds;
-    private boolean crib;
-    private boolean fullBath;
-    private boolean privateEntrance;
+    private Boolean crib;
+    private Boolean fullBath;
+    private Boolean privateEntrance;
     private String notes;
     private ContactMethod primaryContactMethod;
+    private String createdDate;
+    private String lastUpdated;
 
 }

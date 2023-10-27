@@ -1,9 +1,12 @@
 package com.yl.reservation.host.controller;
 
+import com.yl.reservation.host.exception.HostException;
 import com.yl.reservation.host.model.Host;
+import com.yl.reservation.host.model.HostRequest;
 import com.yl.reservation.host.service.HostResponse;
 import com.yl.reservation.host.service.HostService;
 import com.yl.reservation.host.util.HostConstants;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,40 +43,16 @@ public class HostController {
         }
     }
 
-    @PostMapping()
-    public ResponseEntity<HostResponse> createHost(@RequestBody Host host) {
-        try {
-            HostResponse hostResponse = new HostResponse();
-            Host newHost = hostService.createHost(host);
-            if (null != newHost) {
-                hostResponse.setMessage("Successful creation of new host");
-                hostResponse.setHost(newHost);
-            } else {
-                hostResponse.setMessage(String.format("Host %s %s at %s already exists", host.getFirstName(), host.getLastName(), host.getAddress()));
-            }
-            return new ResponseEntity<>(hostResponse, HttpStatus.OK);
-        } catch (Exception ex) {
-            return new ResponseEntity<>(new HostResponse(HostConstants.GENERAL_HOST_ERROR, null),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-    }
-
     @PostMapping("/update")
-    public ResponseEntity<HostResponse> updateHost(@RequestBody Host host) {
+    public ResponseEntity<HostResponse> updateHost(@RequestBody HostRequest request) {
         try {
-            Host updatedHost = hostService.updateHost(host);
-            HostResponse hostResponse = new HostResponse();
-            if (null != updatedHost){
-                hostResponse.setHost(updatedHost);
-                hostResponse.setMessage(String.format("Host %s updated", updatedHost.getId()));
+            HostResponse hostResponse = hostService.updateHost(request);
                 return new ResponseEntity<>(hostResponse,HttpStatus.OK);
-            } else {
-                hostResponse.setMessage("No such host");
-                return new ResponseEntity<>(hostResponse, HttpStatus.NOT_FOUND);
-            }
-
+        } catch (HostException ex) {
+            //todo: logging
+            throw ex;
         } catch (Exception ex) {
+            //todo: logging
             return new ResponseEntity<>(new HostResponse(HostConstants.GENERAL_HOST_ERROR, null),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
