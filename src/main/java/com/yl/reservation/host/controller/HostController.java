@@ -6,7 +6,6 @@ import com.yl.reservation.host.model.HostRequest;
 import com.yl.reservation.host.service.HostResponse;
 import com.yl.reservation.host.service.HostService;
 import com.yl.reservation.host.util.HostConstants;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,17 +44,21 @@ public class HostController {
 
     @PostMapping("/update")
     public ResponseEntity<HostResponse> updateHost(@RequestBody HostRequest request) {
+        HostResponse response = new HostResponse();
+        HttpStatus status;
         try {
-            HostResponse hostResponse = hostService.updateHost(request);
-                return new ResponseEntity<>(hostResponse,HttpStatus.OK);
+            response = hostService.updateHost(request);
+            status = HttpStatus.OK;
         } catch (HostException ex) {
             //todo: logging
-            throw ex;
+            response.setMessage(ex.getMessage());
+            status = ex.getStatus();
         } catch (Exception ex) {
             //todo: logging
-            return new ResponseEntity<>(new HostResponse(HostConstants.GENERAL_HOST_ERROR, null),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+            response.setMessage(HostConstants.GENERAL_HOST_ERROR);
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
         }
+        return new ResponseEntity<>(response,status);
     }
 
     @DeleteMapping("/{id}")

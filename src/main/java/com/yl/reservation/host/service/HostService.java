@@ -4,11 +4,11 @@ import com.yl.reservation.host.exception.HostException;
 import com.yl.reservation.host.model.Host;
 import com.yl.reservation.host.model.HostRequest;
 import com.yl.reservation.host.repository.HostRepository;
+import com.yl.reservation.host.util.HostUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,7 +29,7 @@ public class HostService {
     }
 
     public HostResponse updateHost(HostRequest request) {
-        Date createUpdateDateTime = new Date();
+        String createUpdateDateTime = HostUtil.getCurrentDateTimeString();
         HostResponse response = new HostResponse();
         Optional<Host> hostToUpdate;
         Host updatedHost;
@@ -54,16 +54,18 @@ public class HostService {
 
             updateHostFields(updatedHost,request.getHost());
 
-            updatedHost.setLastUpdated(String.valueOf(createUpdateDateTime));
+            updatedHost.setLastUpdated(createUpdateDateTime);
 
             hostRepository.save(updatedHost);
 
             response.setMessage("Updated host " + updatedHost.getId());
 
         } else {
-            // insert a new document
+            // insert a new host document
+            //todo: validate that first, last, address are present. either phone or email also.
             updatedHost = request.getHost();
-            updatedHost.setCreatedDate(String.valueOf(createUpdateDateTime));
+            updatedHost.setCreatedDate(createUpdateDateTime);
+            updatedHost.setLastUpdated(createUpdateDateTime);
             updatedHost = hostRepository.save(request.getHost());
             response.setMessage("Created host " + updatedHost.getId());
         }
