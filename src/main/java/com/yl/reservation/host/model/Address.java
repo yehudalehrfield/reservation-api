@@ -17,4 +17,17 @@ public class Address {
         return addressLine1 + (addressLine2 == null ? "" : " " + addressLine2) +
                 ", " + city + " " + state + ", " + zip;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Address that = (Address) o;
+        return addressLine1.equals(that.addressLine1)
+                && (addressLine2 != null && that.addressLine2 != null)
+                    ? addressLine2.equals(that.addressLine2)
+                    : city.equals(that.city)
+                && state.equals(that.state)
+                && zip.equals(that.zip);
+    }
 }

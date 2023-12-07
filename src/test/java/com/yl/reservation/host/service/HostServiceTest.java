@@ -57,9 +57,12 @@ class HostServiceTest {
         hostToUpdate.setId("abc");
         hostToUpdate.setLastName("smith");
         hostToUpdate.setFirstName("joe");
+        hostToUpdate.setPhone(List.of(new Phone(Phone.PhoneType.HOME,"1234567890",true)));
+        hostToUpdate.setPrimaryContactMethod(ContactMethod.PHONE);
+        Address address = new Address("123 Main St. ", null, "New York", State.NY, "10000");
+        hostToUpdate.setAddress(address);
 
         when(hostRepository.findById(Mockito.anyString())).thenReturn(Optional.of(hostToUpdate));
-//        Mockito.when(hostRepository.save(Mockito.any())).thenReturn(hostToUpdate);
 
         Host requestHost = new Host();
         requestHost.setId("abc");
@@ -76,6 +79,30 @@ class HostServiceTest {
         assertEquals("Updated host abc", resp.getMessage());
     }
 
+    @Test
+    void updateNoUpdates(){
+        Host hostToUpdate = new Host();
+        hostToUpdate.setId("abc");
+        hostToUpdate.setLastName("smith");
+        hostToUpdate.setFirstName("joe");
+        hostToUpdate.setPhone(List.of(new Phone(Phone.PhoneType.HOME,"1234567890",true)));
+        hostToUpdate.setPrimaryContactMethod(ContactMethod.PHONE);
+        Address address = new Address("123 Main St. ", null, "New York", State.NY, "10000");
+        hostToUpdate.setAddress(address);
+
+        when(hostRepository.findById(Mockito.anyString())).thenReturn(Optional.of(hostToUpdate));
+//        Mockito.when(hostRepository.save(Mockito.any())).thenReturn(hostToUpdate);
+
+        Host requestHost = new Host();
+        requestHost.setId("abc");
+        requestHost.setPrimaryContactMethod(ContactMethod.PHONE);
+
+        HostRequest request = new HostRequest(requestHost);
+
+        HostException resp = Assertions.assertThrows(HostException.class,()-> hostService.updateHost(request));
+        assertEquals("No updates to apply", resp.getMessage());
+
+    }
     @Test
     void updateHostNoHost(){
         HostRequest request = new HostRequest();
@@ -101,7 +128,10 @@ class HostServiceTest {
         Host requestHost = new Host();
         requestHost.setLastName("smith");
         requestHost.setFirstName("joe");
+        requestHost.setPhone(List.of(new Phone(Phone.PhoneType.HOME,"1234567890",true)));
+        requestHost.setPrimaryContactMethod(ContactMethod.PHONE);
         Address address = new Address("123 Main St. ", null, "New York", State.NY, "10000");
+        requestHost.setAddress(address);
         HostRequest request = new HostRequest(requestHost);
         when(hostRepository.save(Mockito.any())).thenReturn(requestHost);
         HostResponse hostResponse = hostService.updateHost(request);

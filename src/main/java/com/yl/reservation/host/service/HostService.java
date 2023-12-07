@@ -46,13 +46,14 @@ public class HostService {
             }
         } else {
             // no id is given. find the host by last name and address
+            //todo: is it enough to check by lastName and address? firstName also? email? phone?
             hostToUpdate = hostRepository.findByLastNameAndAddress(request.getHost().getLastName(), request.getHost().getAddress());
         }
         // if host exists, update the existing document
         if (hostToUpdate.isPresent()) {
             updatedHost = hostToUpdate.get();
 
-            updateHostFields(updatedHost,request.getHost());
+            updateHostFields(updatedHost, request.getHost());
 
             updatedHost.setLastUpdated(createUpdateDateTime);
 
@@ -62,7 +63,12 @@ public class HostService {
 
         } else {
             // insert a new host document
+            //todo: check if this is an address change?
+//            if (doesExist(request.getHost()))
+//                throw new HostException(HttpStatus.BAD_REQUEST,"Host with given contact info already exists");
             //todo: validate that first, last, address are present. either phone or email also.
+            HostUtil.validateHostCreationFields(request);
+
             updatedHost = request.getHost();
             updatedHost.setCreatedDate(createUpdateDateTime);
             updatedHost.setLastUpdated(createUpdateDateTime);
@@ -75,20 +81,36 @@ public class HostService {
     }
 
     private void updateHostFields(Host updatedHost, Host requestHost) {
-        //todo: there must be a better way
-        if (requestHost.getEmail() != null) updatedHost.setEmail(requestHost.getEmail());
-        if (requestHost.getAddress() != null) updatedHost.setAddress(requestHost.getAddress());
-        if (requestHost.getPhone() != null) updatedHost.setPhone(requestHost.getPhone());
-        if (requestHost.getNotes() != null) updatedHost.setNotes(requestHost.getNotes());
-        if (requestHost.getBeds() > 0) updatedHost.setBeds(requestHost.getBeds());
-        if (requestHost.getCrib() != null) updatedHost.setCrib(requestHost.getCrib());
-        if (requestHost.getFullBath() != null) updatedHost.setFullBath(requestHost.getFullBath());
-        if (requestHost.getPrivateEntrance() != null) updatedHost.setPrivateEntrance(requestHost.getPrivateEntrance());
-        if (requestHost.getPrimaryContactMethod() != null) updatedHost.setPrimaryContactMethod(requestHost.getPrimaryContactMethod());
+        if (!HostUtil.isUpdate(updatedHost, requestHost)) {
+            throw new HostException(HttpStatus.OK, "No updates to apply");
+        } else {
+            //todo: there must be a better way
+            if (requestHost.getEmail() != null) updatedHost.setEmail(requestHost.getEmail());
+            if (requestHost.getPhone() != null) updatedHost.setPhone(requestHost.getPhone());
+            if (requestHost.getPrimaryContactMethod() != null) updatedHost.setPrimaryContactMethod(requestHost.getPrimaryContactMethod());
+            if (requestHost.getAddress() != null) updatedHost.setAddress(requestHost.getAddress());
+            if (requestHost.getBeds() > 0) updatedHost.setBeds(requestHost.getBeds());
+            if (requestHost.getNotes() != null) updatedHost.setNotes(requestHost.getNotes());
+            if (requestHost.getCrib() != null) updatedHost.setCrib(requestHost.getCrib());
+            if (requestHost.getFullBath() != null) updatedHost.setFullBath(requestHost.getFullBath());
+            if (requestHost.getPrivateEntrance() != null) updatedHost.setPrivateEntrance(requestHost.getPrivateEntrance());
+        }
+
     }
 
     public Host getHostById(String id) {
         Optional<Host> host = hostRepository.findById(id);
         return host.orElse(null);
     }
+
+//    public boolean doesExist(Host requestHost){
+//        //todo: if we don't match the list, search for the primary email/phone within the list
+//        Optional<Host> existingHost;
+//        if (requestHost.getPrimaryContactMethod() == ContactMethod.PHONE){
+//            existingHost = hostRepository.findByLastAndEmail(requestHost.getLastName(), requestHost.getEmail());
+//        } else {
+//            existingHost = hostRepository.findByLastNameAndPhone(requestHost.getLastName(), requestHost.getPhone());
+//        }
+//        return existingHost.isPresent();
+//    }
 }
