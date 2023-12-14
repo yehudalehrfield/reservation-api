@@ -49,7 +49,8 @@ public class HostGraphService {
     private Mono<HostResponse> updateExistingHost(Host hostToUpdate, Host hostFromRequest, String createUpdateDateTime){
         updateHostFields(hostToUpdate, hostFromRequest);
         hostToUpdate.setLastUpdated(createUpdateDateTime);
-        return hostRepositoryReactive.save(hostToUpdate).flatMap(savedHost -> Mono.just(new HostResponse("Updated host: " + savedHost.getId(),savedHost)));
+        return hostRepositoryReactive.save(hostToUpdate)
+                .flatMap(savedHost -> Mono.just(new HostResponse("Updated host: " + savedHost.getId(),savedHost)));
     }
 
     private Mono<HostResponse> createNewHost(HostUpdateRequest hostUpdateRequest, String createUpdateDateTime){
@@ -59,7 +60,8 @@ public class HostGraphService {
         Host updatedHost = hostUpdateRequest.getHost();
         updatedHost.setCreatedDate(createUpdateDateTime);
         updatedHost.setLastUpdated(createUpdateDateTime);
-        return hostRepositoryReactive.save(updatedHost).flatMap(savedHost -> Mono.just(new HostResponse("Created host " + savedHost.getId(),savedHost)));
+        return hostRepositoryReactive.save(updatedHost)
+                .flatMap(savedHost -> Mono.just(new HostResponse("Created host " + savedHost.getId(),savedHost)));
     }
 
     //todo: move to util?

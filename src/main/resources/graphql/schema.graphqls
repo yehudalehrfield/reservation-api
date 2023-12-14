@@ -4,7 +4,7 @@ type Query {
 }
 
 type Mutation{
-    createUpdateHost(hostUpdateRequest: HostUpdateRequest): Host
+    createUpdateHost(hostUpdateRequest: HostUpdateRequest): HostResponse
 }
 
 type Host {
@@ -95,5 +95,9 @@ input AddressInput {
 enum ContactMethod {
     PHONE
     EMAIL
+}
+type HostResponse{
+    message: String
+    host: Host
 }
 

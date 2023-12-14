@@ -33,6 +33,7 @@ public class HostGraphController {
     }
     @QueryMapping
     public Mono<Host> hostById(@Argument String id){
+        //todo: fix logging
         return hostGraphService.getHostById(id)
                 .switchIfEmpty(Mono.error(new GraphQLException("Host not found with id: " + id, HttpStatus.NOT_FOUND)))
                 .doOnNext(res -> logger.info(String.valueOf(res)))
@@ -41,6 +42,7 @@ public class HostGraphController {
     }
 
     @MutationMapping
+    //todo: logging
     public Mono<HostResponse> createUpdateHost(@Argument HostUpdateRequest hostUpdateRequest){
         return hostGraphService.createUpdateHost(hostUpdateRequest);
     }
