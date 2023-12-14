@@ -8,11 +8,11 @@
 		<version>3.1.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.yl.reservation</groupId>
-	<artifactId>host</artifactId>
+	<groupId>com.yl</groupId>
+	<artifactId>reservation</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>host</name>
-	<description>Hosting API for Guest Reservations</description>
+	<name>reservation</name>
+	<description>Reservation API</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
