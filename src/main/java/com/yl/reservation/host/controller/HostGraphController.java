@@ -1,12 +1,15 @@
-package com.yl.reservation.host.controller;
+ package com.yl.reservation.host.controller;
 
 import com.yl.reservation.host.exception.GraphQLException;
 import com.yl.reservation.host.model.Host;
 import com.yl.reservation.host.service.HostGraphService;
+import com.yl.reservation.host.service.HostResponse;
+import com.yl.reservation.host.service.HostUpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,6 +38,11 @@ public class HostGraphController {
                 .doOnNext(res -> logger.info(String.valueOf(res)))
                 .doFinally(res -> logger.info("Search for host with id: {}, response: {}", id, res))
                 .cache();
+    }
+
+    @MutationMapping
+    public Mono<HostResponse> createUpdateHost(@Argument HostUpdateRequest hostUpdateRequest){
+        return hostGraphService.createUpdateHost(hostUpdateRequest);
     }
 
 

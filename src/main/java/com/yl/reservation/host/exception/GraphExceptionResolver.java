@@ -14,14 +14,13 @@ public class GraphExceptionResolver extends DataFetcherExceptionResolverAdapter 
     protected GraphQLError resolveToSingleError(Throwable ex, DataFetchingEnvironment env){
         GraphqlErrorBuilder<?> gqlErrorBuilder = GraphqlErrorBuilder.newError();
         if (ex instanceof GraphQLException graphQLException){
+            gqlErrorBuilder.message(graphQLException.getMessage());
             if (graphQLException.getErrorCode().toString().contains(HttpStatus.NOT_FOUND.toString())) {
-                gqlErrorBuilder
-                        .errorType(ErrorType.NOT_FOUND)
-                        .message(graphQLException.getMessage());
+                gqlErrorBuilder.errorType(ErrorType.NOT_FOUND);
+            } else if (graphQLException.getErrorCode().toString().contains(HttpStatus.BAD_REQUEST.toString())) {
+                gqlErrorBuilder.errorType(ErrorType.BAD_REQUEST);
             } else {
-                gqlErrorBuilder
-                        .errorType(ErrorType.INTERNAL_ERROR)
-                        .message(graphQLException.getMessage());
+                gqlErrorBuilder.errorType(ErrorType.INTERNAL_ERROR);
             }
         }
         return gqlErrorBuilder.build();

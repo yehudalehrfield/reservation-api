@@ -3,7 +3,7 @@ package com.yl.reservation.host.util;
 import com.yl.reservation.host.exception.HostException;
 import com.yl.reservation.host.model.ContactMethod;
 import com.yl.reservation.host.model.Host;
-import com.yl.reservation.host.model.HostRequest;
+import com.yl.reservation.host.service.HostUpdateRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 
@@ -15,12 +15,12 @@ public class HostUtil {
         return LocalDateTime.now().toString();
     }
 
-    public static void validateHostCreationFields(HostRequest request) throws HostException {
+    public static void validateHostCreationFields(HostUpdateRequest request) throws HostException {
         validatePrimaryInfo(request);
         validateContactInfo(request);
     }
 
-    public static void validatePrimaryInfo(HostRequest request){
+    public static void validatePrimaryInfo(HostUpdateRequest request){
         if ((request.getHost().getFirstName() == null || !StringUtils.hasText(request.getHost().getFirstName())))
             throw new HostException(HttpStatus.BAD_REQUEST,"First name is missing");
         if ((request.getHost().getLastName() == null || !StringUtils.hasText(request.getHost().getLastName())))
@@ -29,7 +29,7 @@ public class HostUtil {
             throw new HostException(HttpStatus.BAD_REQUEST,"Address is missing");
     }
 
-    public static void validateContactInfo(HostRequest request){
+    public static void validateContactInfo(HostUpdateRequest request){
         boolean hasEmail = request.getHost().getEmail() != null && StringUtils.hasText(request.getHost().getEmail().get(0).getValue());
         boolean hasPhone = request.getHost().getPhone() != null && StringUtils.hasText(request.getHost().getPhone().get(0).getValue());
         boolean hasPrimaryContact;

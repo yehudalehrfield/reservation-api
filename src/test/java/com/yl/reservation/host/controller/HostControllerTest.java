@@ -2,7 +2,7 @@ package com.yl.reservation.host.controller;
 
 import com.yl.reservation.host.exception.HostException;
 import com.yl.reservation.host.model.Host;
-import com.yl.reservation.host.model.HostRequest;
+import com.yl.reservation.host.service.HostUpdateRequest;
 import com.yl.reservation.host.repository.HostRepository;
 import com.yl.reservation.host.service.HostResponse;
 import com.yl.reservation.host.service.HostService;
@@ -89,7 +89,7 @@ class HostControllerTest {
 
     @Test
     void update() {
-        HostRequest request = new HostRequest();
+        HostUpdateRequest request = new HostUpdateRequest();
         Host host = new Host();
         host.setId("abc");
         host.setLastName("smith");
@@ -106,7 +106,7 @@ class HostControllerTest {
 
     @Test
     void updateHostException(){
-        HostRequest request = new HostRequest();
+        HostUpdateRequest request = new HostUpdateRequest();
         Mockito.when(hostService.updateHost(request)).thenThrow(new HostException(HttpStatus.BAD_REQUEST, "No host included in the request"));
 //        Assertions.assertThrows(HostException.class,()->hostController.updateHost(request));
         ResponseEntity resp = hostController.updateHost(request);
@@ -115,7 +115,7 @@ class HostControllerTest {
 
     @Test
     void updateException(){
-        HostRequest request = new HostRequest();
+        HostUpdateRequest request = new HostUpdateRequest();
         Mockito.when(hostService.updateHost(request)).thenThrow(new RuntimeException());
 //        Assertions.assertThrows(HostException.class,()->hostController.updateHost(request));
         ResponseEntity resp = hostController.updateHost(request);

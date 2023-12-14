@@ -2,7 +2,6 @@ package com.yl.reservation.host.service;
 
 import com.yl.reservation.host.exception.HostException;
 import com.yl.reservation.host.model.Host;
-import com.yl.reservation.host.model.HostRequest;
 import com.yl.reservation.host.repository.HostRepository;
 import com.yl.reservation.host.util.HostUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,7 @@ public class HostService {
         return deletedHost;
     }
 
-    public HostResponse updateHost(HostRequest request) {
+    public HostResponse updateHost(HostUpdateRequest request) {
         String createUpdateDateTime = HostUtil.getCurrentDateTimeString();
         HostResponse response = new HostResponse();
         Optional<Host> hostToUpdate;

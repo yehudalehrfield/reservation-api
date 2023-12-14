@@ -2,7 +2,7 @@ package com.yl.reservation.host.controller;
 
 import com.yl.reservation.host.exception.HostException;
 import com.yl.reservation.host.model.Host;
-import com.yl.reservation.host.model.HostRequest;
+import com.yl.reservation.host.service.HostUpdateRequest;
 import com.yl.reservation.host.service.HostResponse;
 import com.yl.reservation.host.service.HostService;
 import com.yl.reservation.host.util.HostConstants;
@@ -43,7 +43,7 @@ public class HostController {
     }
 
     @PostMapping("/update")
-    public ResponseEntity<HostResponse> updateHost(@RequestBody HostRequest request) {
+    public ResponseEntity<HostResponse> updateHost(@RequestBody HostUpdateRequest request) {
         HostResponse response = new HostResponse();
         HttpStatus status;
         try {

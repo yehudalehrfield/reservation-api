@@ -3,6 +3,10 @@ type Query {
     getAllHosts: [Host]
 }
 
+type Mutation{
+    createUpdateHost(hostUpdateRequest: HostUpdateRequest): Host
+}
+
 type Host {
     id: ID
     firstName: String
@@ -20,7 +24,34 @@ type Host {
     lastUpdated: String
 }
 
+input HostInput {
+    id: ID
+    firstName: String
+    lastName: String
+    phone: [PhoneInput]
+    email: [EmailInput]
+    address: AddressInput
+    beds: Int
+    crib: Boolean
+    fullBath: Boolean
+    privateEntrance: Boolean
+    notes: String
+    primaryContactMethod: ContactMethod
+    createdDate: String
+    lastUpdated: String
+}
+
+input HostUpdateRequest{
+    host: HostInput
+}
+
 type Phone {
+    type: PhoneType
+    value: String
+    isPrimary: Boolean
+}
+
+input PhoneInput {
     type: PhoneType
     value: String
     isPrimary: Boolean
@@ -37,7 +68,11 @@ type Email {
     value: String
     isPrimary: Boolean
 }
-
+input EmailInput {
+    type: EmailType
+    value: String
+    isPrimary: Boolean
+}
 enum EmailType {
     PERSONAL
     WORK
@@ -50,8 +85,15 @@ type Address {
     state: String
     zip: String
 }
-
+input AddressInput {
+    addressLine1: String
+    addressLine2: String
+    city: String
+    state: String
+    zip: String
+}
 enum ContactMethod {
     PHONE
     EMAIL
 }
+
