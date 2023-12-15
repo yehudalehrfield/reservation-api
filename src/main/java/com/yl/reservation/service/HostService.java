@@ -1,7 +1,10 @@
 package com.yl.reservation.service;
 
 import com.yl.reservation.exception.HostException;
+import com.yl.reservation.model.ContactMethod;
+import com.yl.reservation.model.Email;
 import com.yl.reservation.model.Host;
+import com.yl.reservation.model.Phone;
 import com.yl.reservation.repository.HostRepository;
 import com.yl.reservation.util.HostUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class HostService {
@@ -67,6 +71,11 @@ public class HostService {
             // insert a new host document
             HostUtil.validateHostCreationFields(request);
 
+            if (doesExist(request.getHost())){
+                System.out.println("Host Already Exists");
+                throw new HostException(HttpStatus.BAD_REQUEST, "Host Already Exists. Need to add functionality to update the address here.");
+            }
+
             updatedHost = request.getHost();
             updatedHost.setCreatedDate(createUpdateDateTime);
             updatedHost.setLastUpdated(createUpdateDateTime);
@@ -84,13 +93,14 @@ public class HostService {
     }
 
     //todo:
-//    public boolean doesExist(Host requestHost){
-//        Optional<Host> existingHost;
-//        if (requestHost.getPrimaryContactMethod() == ContactMethod.PHONE){
-//            existingHost = hostRepository.findByLastAndEmail(requestHost.getLastName(), requestHost.getEmail());
-//        } else {
-//            existingHost = hostRepository.findByLastNameAndPhone(requestHost.getLastName(), requestHost.getPhone());
-//        }
-//        return existingHost.isPresent();
-//    }
+    public boolean doesExist(Host requestHost){
+        List<Host> existingHost;
+        if (requestHost.getPrimaryContactMethod() == ContactMethod.PHONE){
+            existingHost = hostRepository.findByLastNameAndPrimaryPhone(requestHost.getLastName(), requestHost.getPhone().stream().filter(Phone::isPrimary).toList().get(0).getValue());
+        } else {
+            existingHost = hostRepository.findByLastNameAndPrimaryEmail(requestHost.getLastName(), requestHost.getEmail().stream().filter(Email::isPrimary).toList().get(0).getValue());
+        }
+        if (existingHost.size() > 1) throw new HostException(HttpStatus.BAD_REQUEST, "Multiple hosts with given lastName and primary contact info. This needs to be dealt with.");
+        return !existingHost.isEmpty();
+    }
 }
