@@ -65,4 +65,27 @@ public class HostUtil {
         return requestHost.getAddress() != null && !requestHost.getAddress().equals(updatedHost.getAddress());
     }
 
+    public static void updateHostFields(Host updatedHost, Host requestHost) {
+        if (!isUpdate(updatedHost, requestHost)) {
+            throw new HostException(HttpStatus.OK, "No updates to apply");
+        } else {
+            if (requestHost.getAddress() != null) updatedHost.setAddress(requestHost.getAddress());
+            updateHostContactInfo(requestHost,updatedHost);
+            updateHostInfo(requestHost,updatedHost);
+        }
+    }
+
+    private static void updateHostContactInfo(Host requestHost, Host updatedHost){
+        if (requestHost.getEmail() != null) updatedHost.setEmail(requestHost.getEmail());
+        if (requestHost.getPhone() != null) updatedHost.setPhone(requestHost.getPhone());
+        if (requestHost.getPrimaryContactMethod() != null) updatedHost.setPrimaryContactMethod(requestHost.getPrimaryContactMethod());
+    }
+
+    private static void updateHostInfo(Host requestHost, Host updatedHost){
+        if (requestHost.getBeds() > 0) updatedHost.setBeds(requestHost.getBeds());
+        if (requestHost.getNotes() != null) updatedHost.setNotes(requestHost.getNotes());
+        if (requestHost.getCrib() != null) updatedHost.setCrib(requestHost.getCrib());
+        if (requestHost.getFullBath() != null) updatedHost.setFullBath(requestHost.getFullBath());
+        if (requestHost.getPrivateEntrance() != null) updatedHost.setPrivateEntrance(requestHost.getPrivateEntrance());
+    }
 }

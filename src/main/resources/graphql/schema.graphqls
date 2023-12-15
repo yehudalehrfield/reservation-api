@@ -42,7 +42,8 @@ input HostInput {
 }
 
 input HostUpdateRequest{
-    host: HostInput
+    isAddressUpdate: Boolean
+    host: HostInput!
 }
 
 type Phone {

@@ -69,7 +69,7 @@ class HostServiceTest {
         requestHost.setNotes("notes");
         requestHost.setPrimaryContactMethod(ContactMethod.PHONE);
 
-        HostUpdateRequest request = new HostUpdateRequest(requestHost);
+        HostUpdateRequest request = new HostUpdateRequest(requestHost, false);
 
         HostResponse resp = hostService.updateHost(request);
         String updateTime = LocalDateTime.now().toString().substring(0,16);
@@ -97,7 +97,7 @@ class HostServiceTest {
         requestHost.setId("abc");
         requestHost.setPrimaryContactMethod(ContactMethod.PHONE);
 
-        HostUpdateRequest request = new HostUpdateRequest(requestHost);
+        HostUpdateRequest request = new HostUpdateRequest(requestHost, false);
 
         HostException resp = Assertions.assertThrows(HostException.class,()-> hostService.updateHost(request));
         assertEquals("No updates to apply", resp.getMessage());
@@ -115,7 +115,7 @@ class HostServiceTest {
     void updateHostNotFound(){
         Host requestHost = new Host();
         requestHost.setId("abc");
-        HostUpdateRequest request = new HostUpdateRequest(requestHost);
+        HostUpdateRequest request = new HostUpdateRequest(requestHost, false);
         when(hostRepository.findById(Mockito.anyString())).thenReturn(Optional.empty());
         HostException exception = Assertions.assertThrows(HostException.class,() -> hostService.updateHost(request));
         assertEquals("No host with id: abc", exception.getMessage());
@@ -132,7 +132,7 @@ class HostServiceTest {
         requestHost.setPrimaryContactMethod(ContactMethod.PHONE);
         Address address = new Address("123 Main St. ", null, "New York", State.NY, "10000");
         requestHost.setAddress(address);
-        HostUpdateRequest request = new HostUpdateRequest(requestHost);
+        HostUpdateRequest request = new HostUpdateRequest(requestHost, false);
         when(hostRepository.save(Mockito.any())).thenReturn(requestHost);
         HostResponse hostResponse = hostService.updateHost(request);
         assertEquals("smith",hostResponse.getHost().getLastName());

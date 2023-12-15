@@ -47,14 +47,14 @@ public class HostGraphService {
         }
     }
     private Mono<HostResponse> updateExistingHost(Host hostToUpdate, Host hostFromRequest, String createUpdateDateTime){
-        updateHostFields(hostToUpdate, hostFromRequest);
+        HostUtil.updateHostFields(hostToUpdate, hostFromRequest);
         hostToUpdate.setLastUpdated(createUpdateDateTime);
         return hostRepositoryReactive.save(hostToUpdate)
                 .flatMap(savedHost -> Mono.just(new HostResponse("Updated host: " + savedHost.getId(),savedHost)));
     }
 
     private Mono<HostResponse> createNewHost(HostUpdateRequest hostUpdateRequest, String createUpdateDateTime){
-        //todo: check if this is an update to address, if no, fetch by lastname and address to validate new host...
+        //todo: check if this is an update to address, if no, fetch by lastname and primary contact deets to validate new host...
         HostUtil.validateHostCreationFields(hostUpdateRequest);
 
         Host updatedHost = hostUpdateRequest.getHost();
@@ -64,30 +64,4 @@ public class HostGraphService {
                 .flatMap(savedHost -> Mono.just(new HostResponse("Created host " + savedHost.getId(),savedHost)));
     }
 
-    //todo: move to util?
-    private void updateHostFields(Host updatedHost, Host requestHost) {
-        if (!HostUtil.isUpdate(updatedHost, requestHost)) {
-            throw new HostException(HttpStatus.OK, "No updates to apply");
-        } else {
-            if (requestHost.getAddress() != null) updatedHost.setAddress(requestHost.getAddress());
-            updateContactInfo(requestHost,updatedHost);
-            updateReservationInfo(requestHost,updatedHost);
-        }
-
-    }
-    //todo: move to util?
-    private void updateContactInfo(Host requestHost, Host updatedHost){
-        if (requestHost.getEmail() != null) updatedHost.setEmail(requestHost.getEmail());
-        if (requestHost.getPhone() != null) updatedHost.setPhone(requestHost.getPhone());
-        if (requestHost.getPrimaryContactMethod() != null) updatedHost.setPrimaryContactMethod(requestHost.getPrimaryContactMethod());
-    }
-
-    //todo: move to util?
-    private void updateReservationInfo(Host requestHost, Host updatedHost){
-        if (requestHost.getBeds() > 0) updatedHost.setBeds(requestHost.getBeds());
-        if (requestHost.getNotes() != null) updatedHost.setNotes(requestHost.getNotes());
-        if (requestHost.getCrib() != null) updatedHost.setCrib(requestHost.getCrib());
-        if (requestHost.getFullBath() != null) updatedHost.setFullBath(requestHost.getFullBath());
-        if (requestHost.getPrivateEntrance() != null) updatedHost.setPrivateEntrance(requestHost.getPrivateEntrance());
-    }
 }
