@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class HostService {
@@ -49,13 +48,14 @@ public class HostService {
             }
         } else {
             // no id is given. find the host by last name and address
-            hostToUpdate = hostRepository.findByLastNameAndAddress(request.getHost().getLastName(), request.getHost().getAddress());
+            hostToUpdate = hostRepository.findByLastNameAndAddress(request.getHost().getLastName(),
+                    request.getHost().getAddress());
         }
         // if host exists, update the existing document
         if (hostToUpdate.isPresent()) {
             updatedHost = hostToUpdate.get();
 
-            HostUtil.updateHostFields(updatedHost, request.getHost());
+            HostUtil.updateHostFields(updatedHost, request.getHost(), request.getIsAddressUpdate());
 
             updatedHost.setLastUpdated(createUpdateDateTime);
 
@@ -64,23 +64,28 @@ public class HostService {
             response.setMessage("Updated host " + updatedHost.getId());
 
         } else {
-            //todo: check if this is an address change?
-//            if (doesExist(request.getHost()))
-//                throw new HostException(HttpStatus.BAD_REQUEST,"Host with given contact info already exists");
+            // check if host exists with name and email/phone (but request has a different address)
+            updatedHost = doesHostExistDifferentAddress(request.getHost());
+            if (updatedHost != null) {
+                System.out.println("Host Already Exists. Working on updating address.");
+                if (request.getIsAddressUpdate() != null){
+                    HostUtil.updateHostFields(updatedHost, request.getHost(), request.getIsAddressUpdate());
+                    hostRepository.save(updatedHost);
+                    response.setMessage("Updated host " + updatedHost.getId() + " including address change.");
+                } else {
+                    throw new HostException(HttpStatus.BAD_REQUEST, "Cannot apply update. Change of address identified but isAddressUpdate is null");
+                }
+            } else {
+                // insert a new host document
+                HostUtil.validateHostCreationFields(request);
 
-            // insert a new host document
-            HostUtil.validateHostCreationFields(request);
-
-            if (doesExist(request.getHost())){
-                System.out.println("Host Already Exists");
-                throw new HostException(HttpStatus.BAD_REQUEST, "Host Already Exists. Need to add functionality to update the address here.");
+                updatedHost = request.getHost();
+                updatedHost.setCreatedDate(createUpdateDateTime);
+                updatedHost.setLastUpdated(createUpdateDateTime);
+                updatedHost = hostRepository.save(request.getHost());
+                response.setMessage("Created host " + updatedHost.getId());
             }
 
-            updatedHost = request.getHost();
-            updatedHost.setCreatedDate(createUpdateDateTime);
-            updatedHost.setLastUpdated(createUpdateDateTime);
-            updatedHost = hostRepository.save(request.getHost());
-            response.setMessage("Created host " + updatedHost.getId());
         }
 
         response.setHost(updatedHost);
@@ -92,15 +97,20 @@ public class HostService {
         return host.orElse(null);
     }
 
-    //todo:
-    public boolean doesExist(Host requestHost){
+    public Host doesHostExistDifferentAddress(Host requestHost) {
         List<Host> existingHost;
-        if (requestHost.getPrimaryContactMethod() == ContactMethod.PHONE){
-            existingHost = hostRepository.findByLastNameAndPrimaryPhone(requestHost.getLastName(), requestHost.getPhone().stream().filter(Phone::isPrimary).toList().get(0).getValue());
+        if (requestHost.getPrimaryContactMethod() == ContactMethod.PHONE) {
+            existingHost = hostRepository.findByLastNameAndPrimaryPhone(requestHost.getLastName(),
+                    requestHost.getPhone().stream().filter(Phone::isPrimary).toList().get(0).getValue());
         } else {
-            existingHost = hostRepository.findByLastNameAndPrimaryEmail(requestHost.getLastName(), requestHost.getEmail().stream().filter(Email::isPrimary).toList().get(0).getValue());
+            existingHost = hostRepository.findByLastNameAndPrimaryEmail(requestHost.getLastName(),
+                    requestHost.getEmail().stream().filter(Email::isPrimary).toList().get(0).getValue());
         }
-        if (existingHost.size() > 1) throw new HostException(HttpStatus.BAD_REQUEST, "Multiple hosts with given lastName and primary contact info. This needs to be dealt with.");
-        return !existingHost.isEmpty();
+        if (existingHost.size() > 1)
+            throw new HostException(
+                    HttpStatus.BAD_REQUEST,
+                    "Multiple hosts with given lastName and primary contact info. Provide hostId to update host info."
+            );
+        return existingHost.isEmpty() ? null : existingHost.get(0);
     }
 }

@@ -45,7 +45,7 @@ public class HostUtil {
             throw new HostException(HttpStatus.BAD_REQUEST,"Contact information is missing");
     }
 
-    public static boolean isUpdate(Host updatedHost, Host requestHost){
+    public static boolean isUpdate(Host updatedHost, Host requestHost, boolean isAddressUpdate){
         if (requestHost.getEmail() != null && !requestHost.getEmail().equals(updatedHost.getEmail()))
             return true;
         if (requestHost.getPhone() != null && !requestHost.getPhone().equals(updatedHost.getPhone()))
@@ -62,11 +62,11 @@ public class HostUtil {
             return true;
         if (requestHost.getPrimaryContactMethod() != updatedHost.getPrimaryContactMethod())
             return true;
-        return requestHost.getAddress() != null && !requestHost.getAddress().equals(updatedHost.getAddress());
+        return isAddressUpdate && requestHost.getAddress() != null && !requestHost.getAddress().equals(updatedHost.getAddress());
     }
 
-    public static void updateHostFields(Host updatedHost, Host requestHost) {
-        if (!isUpdate(updatedHost, requestHost)) {
+    public static void updateHostFields(Host updatedHost, Host requestHost, boolean isAddressUpdate) {
+        if (!isUpdate(updatedHost, requestHost, isAddressUpdate)) {
             throw new HostException(HttpStatus.OK, "No updates to apply");
         } else {
             if (requestHost.getAddress() != null) updatedHost.setAddress(requestHost.getAddress());

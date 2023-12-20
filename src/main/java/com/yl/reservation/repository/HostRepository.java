@@ -14,9 +14,9 @@ import java.util.Optional;
 public interface HostRepository extends MongoRepository<Host, String> {
     Optional<Host> findByLastNameAndAddress(String lastName, Address address);
 
-    @Query(value = "{ 'phone' : {$elemMatch: { 'value' : ?1} }}")
+    @Query(value = "{$and: [{'lastName': ?0}, { 'phone' : {$elemMatch: { 'value' : ?1} } }] }")
     List<Host> findByLastNameAndPrimaryPhone(String lastName, String phone);
 
-    @Query(value = "{ 'email' : {$elemMatch: { 'value' : ?1} }}")
+    @Query(value = "{$and: [{'lastName': ?0}, { 'email' : {$elemMatch: { 'value' : ?1} } }] }")
     List<Host> findByLastNameAndPrimaryEmail(String lastName, String email);
 }
