@@ -1,18 +1,6 @@
 package com.yl.reservation.service;
 
-import com.yl.reservation.exception.HostException;
-import com.yl.reservation.model.ContactMethod;
-import com.yl.reservation.model.Email;
-import com.yl.reservation.model.Host;
-import com.yl.reservation.model.Phone;
-import com.yl.reservation.repository.HostRepository;
-import com.yl.reservation.util.HostUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class HostService {

@@ -14,9 +14,9 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class HostUtil {
+public class ResUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(HostUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(ResUtil.class);
 
     public static String getCurrentDateTimeString(){
         return LocalDateTime.now().toString();
