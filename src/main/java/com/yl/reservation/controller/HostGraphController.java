@@ -32,12 +32,13 @@ public class HostGraphController {
                 .cache();
     }
     @QueryMapping
-    public Mono<Host> hostById(@Argument String id){
+    public Mono<Host> hostById(@Argument String hostId){
         //todo: fix logging
-        return hostGraphService.getHostById(id)
-                .switchIfEmpty(Mono.error(new GraphQLException("Host not found with id: " + id, HttpStatus.NOT_FOUND)))
+        return hostGraphService.getHostById(hostId)
+                .switchIfEmpty(Mono.error(new GraphQLException("Host not found with id: " + hostId,
+                        HttpStatus.NOT_FOUND)))
                 .doOnNext(res -> logger.info(String.valueOf(res)))
-                .doFinally(res -> logger.info("Search for host with id: {}, response: {}", id, res))
+                .doFinally(res -> logger.info("Search for host with id: {}, response: {}", hostId, res))
                 .cache();
     }
 

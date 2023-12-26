@@ -16,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/hosts")
 public class HostController {
+    /*
     @Autowired
     HostService hostService;
 
@@ -73,4 +74,5 @@ public class HostController {
         return new ResponseEntity<>(hostResponse, HttpStatus.OK);
 
     }
+     */
 }

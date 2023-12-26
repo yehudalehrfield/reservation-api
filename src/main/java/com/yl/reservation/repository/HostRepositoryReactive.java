@@ -10,11 +10,13 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 public interface HostRepositoryReactive extends ReactiveMongoRepository<Host, String> {
-    Mono<Host> findByLastNameAndAddress(String lastName, Address address);
+    Mono<Host> findByUserIdAndAddress(String userId, Address address);
 
-    @Query(value = "{$and: [{'lastName': ?0}, { 'phone' : {$elemMatch: { 'value' : ?1} } }] }")
-    Flux<Host> findByLastNameAndPrimaryPhone(String lastName, String phone);
+    Mono<Host> findByHostId(String hostId);
 
-    @Query(value = "{$and: [{'lastName': ?0}, { 'email' : {$elemMatch: { 'value' : ?1} } }] }")
-    Flux<Host> findByLastNameAndPrimaryEmail(String lastName, String email);
+//    @Query(value = "{$and: [{'lastName': ?0}, { 'phone' : {$elemMatch: { 'value' : ?1} } }] }")
+//    Flux<Host> findByLastNameAndPrimaryPhone(String lastName, String phone);
+
+//    @Query(value = "{$and: [{'lastName': ?0}, { 'email' : {$elemMatch: { 'value' : ?1} } }] }")
+//    Flux<Host> findByLastNameAndPrimaryEmail(String lastName, String email);
 }

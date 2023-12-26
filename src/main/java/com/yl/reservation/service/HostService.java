@@ -16,6 +16,7 @@ import java.util.Optional;
 
 @Service
 public class HostService {
+    /*
 
     @Autowired
     HostRepository hostRepository;
@@ -113,4 +114,6 @@ public class HostService {
             );
         return existingHost.isEmpty() ? null : existingHost.get(0);
     }
+    
+     */
 }
