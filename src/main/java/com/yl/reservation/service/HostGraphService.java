@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class HostGraphService {
     @Autowired
@@ -21,9 +24,25 @@ public class HostGraphService {
     @Autowired
     UserRepositoryReactive userRepositoryReactive;
 
-    public Mono<Host> getHostById(String hostId) {
-        //todo: create HostSearchResponse. include user field. make call to user collection by userId... Maybe have includeUserInfo field in the request...
-        return hostRepositoryReactive.findByHostId(hostId);
+    public Mono<HostSearchResponse> getHostById(String hostId, boolean includeUserInfo) {
+        return hostRepositoryReactive.findByHostId(hostId)
+                .flatMap(host -> {
+                    HostDetails hostDetails = new HostDetails();
+                    HostSearchResponse response = new HostSearchResponse();
+                    hostDetails.setHost(host);
+                    response.setHostDetails(List.of(hostDetails));
+                    if (includeUserInfo) {
+                        return userRepositoryReactive.findByUserId(host.getUserId())
+                                .flatMap(user -> {
+                                    hostDetails.setUser(user);
+                                    response.setMessage(ResConstants.HOST_FIND + host.getHostId() + " with user info...");
+                                    return Mono.just(response);
+                                })
+                                .switchIfEmpty(Mono.error(new GraphQLException(ResConstants.USER_NOT_FOUND_WITH_ID + host.getUserId() + "for host " + hostId,HttpStatus.NOT_FOUND)));
+                    }
+                    response.setMessage(ResConstants.HOST_FIND + host.getHostId());
+                    return Mono.just(response);
+                });
     }
 
     public Flux<Host> getAllHosts() {

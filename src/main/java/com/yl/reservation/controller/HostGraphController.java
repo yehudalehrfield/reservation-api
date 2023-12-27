@@ -4,6 +4,7 @@ import com.yl.reservation.exception.GraphQLException;
 import com.yl.reservation.model.Host;
 import com.yl.reservation.service.HostGraphService;
 import com.yl.reservation.service.HostResponse;
+import com.yl.reservation.service.HostSearchResponse;
 import com.yl.reservation.service.HostUpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +33,9 @@ public class HostGraphController {
                 .cache();
     }
     @QueryMapping
-    public Mono<Host> hostById(@Argument String hostId){
+    public Mono<HostSearchResponse> hostById(@Argument String hostId, @Argument boolean includeUserInfo){
         //todo: fix logging
-        return hostGraphService.getHostById(hostId)
+        return hostGraphService.getHostById(hostId, includeUserInfo)
                 .switchIfEmpty(Mono.error(new GraphQLException("Host not found with id: " + hostId,
                         HttpStatus.NOT_FOUND)))
                 .doOnNext(res -> logger.info(String.valueOf(res)))

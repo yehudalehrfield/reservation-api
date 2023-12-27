@@ -1,5 +1,5 @@
 type Query {
-    hostById(hostId: String!): Host
+    hostById(hostId: String!, includeUserInfo: Boolean = false): HostSearchResponse
     getAllHosts: [Host]
 }
 
@@ -116,6 +116,16 @@ enum ContactMethod {
 }
 type HostResponse{
     message: String
+    host: Host
+    user: User
+}
+
+type HostSearchResponse{
+    message: String
+    hostDetails: [HostDetails]
+}
+
+type HostDetails{
     host: Host
     user: User
 }
