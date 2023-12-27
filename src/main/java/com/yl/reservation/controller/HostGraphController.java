@@ -25,8 +25,8 @@ public class HostGraphController {
 
     private static final Logger logger = LoggerFactory.getLogger(HostGraphController.class);
     @QueryMapping
-    public Flux<Host> getAllHosts(){
-        return hostGraphService.getAllHosts()
+    public Mono<HostSearchResponse> getAllHosts(@Argument boolean includeUserInfo){
+        return hostGraphService.getAllHosts(includeUserInfo)
                 .switchIfEmpty(Mono.error(new GraphQLException("No Hosts Found", HttpStatus.NOT_FOUND)))
                 .doOnNext(res -> logger.info(String.valueOf(res)))
                 .doFinally(res -> logger.info("Search for all hosts with response: {}",res))

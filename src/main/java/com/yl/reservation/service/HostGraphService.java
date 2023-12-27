@@ -45,9 +45,41 @@ public class HostGraphService {
                 });
     }
 
-    public Flux<Host> getAllHosts() {
-        //todo: create HostSearchResponse. include user field. make call to user collection by userId... Maybe have includeUserInfo field in the request...
-        return hostRepositoryReactive.findAll();
+    public Mono<HostSearchResponse> getAllHosts(boolean includeUserInfo) {
+        HostSearchResponse response = new HostSearchResponse();
+        List<HostDetails> hostDetailsList = new ArrayList<>();
+        if (includeUserInfo) {
+            return hostRepositoryReactive.findAll()
+                    .flatMap(host -> {
+                        return Mono.just(host)
+                                .zipWith(userRepositoryReactive.findByUserId(host.getUserId()))
+                                .flatMap(hostAndUser -> {
+                                    HostDetails hostDetails = new HostDetails();
+                                    hostDetails.setHost(hostAndUser.getT1());
+                                    hostDetails.setUser(hostAndUser.getT2());
+                                    hostDetailsList.add(hostDetails);
+                                    return Mono.just(hostDetails);
+                                });
+                    }).then(processHostList(response,hostDetailsList));
+        } else {
+            HostDetails hostDetails = new HostDetails();
+            return hostRepositoryReactive.findAll().collectList()
+                    .flatMap(hostList -> {
+                        hostList.forEach(host -> {
+                            hostDetails.setHost(host);
+                            hostDetailsList.add(hostDetails);
+                        });
+                        response.setHostDetails(hostDetailsList);
+                        response.setMessage("Retrieved all hosts without user info");
+                        return Mono.just(response);
+                    });
+        }
+
+    }
+
+    private Mono<HostSearchResponse> processHostList(HostSearchResponse response, List<HostDetails> hostDetailsList) {
+        response.setHostDetails(hostDetailsList);
+        return Mono.just(response);
     }
 
     public Mono<HostResponse> createUpdateHost(HostUpdateRequest hostUpdateRequest) {
