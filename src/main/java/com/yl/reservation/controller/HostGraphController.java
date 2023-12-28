@@ -34,8 +34,7 @@ public class HostGraphController {
     public Mono<HostSearchResponse> hostById(@Argument String hostId, @Argument boolean includeUserInfo){
         //todo: fix logging
         return hostGraphService.getHostById(hostId, includeUserInfo)
-                .switchIfEmpty(Mono.error(new GraphQLException("Host not found with id: " + hostId,
-                        HttpStatus.NOT_FOUND)))
+                .switchIfEmpty(Mono.error(new GraphQLException("Host not found with id: " + hostId, HttpStatus.NOT_FOUND)))
                 .doOnNext(res -> logger.info(String.valueOf(res)))
                 .doFinally(res -> logger.info("Search for host with id: {}, response: {}", hostId, res))
                 .cache();

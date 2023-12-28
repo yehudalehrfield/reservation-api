@@ -12,6 +12,8 @@ public class ResConstants {
 
 //    HOST
     public static final String HOST_FIND = "Retrieved host ";
+    public static final String HOST_FIND_ALL_USER_INFO = "Retrieved all hosts with user info";
+    public static final String HOST_FIND_ALL_NO_USER_INFO = "Retrieved all hosts without user info";
     public static final String HOST_UPDATE = "Updated host ";
     public static final String HOST_CREATE = "Created host ";
     public static final String HOST_NOT_FOUND_WITH_ID = "No host with id: ";

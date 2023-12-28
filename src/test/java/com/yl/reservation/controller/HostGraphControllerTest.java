@@ -1,0 +1,105 @@
+package com.yl.reservation.controller;
+
+import com.yl.reservation.model.Host;
+import com.yl.reservation.model.User;
+import com.yl.reservation.service.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
+import java.util.List;
+
+@ExtendWith(MockitoExtension.class)
+public class HostGraphControllerTest {
+
+    @InjectMocks
+    HostGraphController hostGraphController;
+
+    @Mock
+    HostGraphService hostGraphService;
+
+    @Test
+    void getAllHosts(){
+        Host host1 = new Host();
+        host1.setHostId("id1");
+        host1.setUserId("userId1");
+        Host host2 = new Host();
+        host2.setHostId("id2");
+        host2.setUserId("userId2");
+
+        User user1 = new User();
+        user1.setUserId("userId1");
+        User user2 = new User();
+        user2.setUserId("userId2");
+
+        HostDetails hostDetails1 = new HostDetails(host1, user1);
+        HostDetails hostDetails2 = new HostDetails(host2, user2);
+        HostDetails hostDetails3 = new HostDetails(host1, null);
+        HostDetails hostDetails4 = new HostDetails(host2, null);
+
+
+        HostSearchResponse responseUserInfo = new HostSearchResponse("success", List.of(hostDetails1,hostDetails2));
+        HostSearchResponse responseNoUserInfo = new HostSearchResponse("success",List.of(hostDetails3, hostDetails4));
+
+        Mockito.when(hostGraphService.getAllHosts(true)).thenReturn(Mono.just(responseUserInfo));
+        Mockito.when(hostGraphService.getAllHosts(false)).thenReturn(Mono.just(responseNoUserInfo));
+
+        StepVerifier.create(hostGraphController.getAllHosts(true))
+                .expectNext(responseUserInfo)
+                .verifyComplete();
+
+        StepVerifier.create(hostGraphController.getAllHosts(false))
+                .expectNext(responseNoUserInfo)
+                .verifyComplete();
+    }
+
+    @Test
+    void getHostById(){
+        Host host = new Host();
+        host.setHostId("hostId");
+        host.setUserId("userId");
+        User user = new User();
+        user.setUserId("userId");
+        HostDetails hostDetails = new HostDetails(host, user);
+        HostDetails hostDetails2 = new HostDetails(host, null);
+
+        HostSearchResponse responseUserInfo = new HostSearchResponse("success",List.of(hostDetails));
+
+        HostSearchResponse responseNoUserInfo = new HostSearchResponse("success",List.of(hostDetails2));
+
+        Mockito.when(hostGraphService.getHostById("hostId",true)).thenReturn(Mono.just(responseUserInfo));
+        Mockito.when(hostGraphService.getHostById("hostId",false)).thenReturn(Mono.just(responseNoUserInfo));
+
+        StepVerifier.create(hostGraphController.hostById("hostId",true))
+                .expectNext(responseUserInfo)
+                .verifyComplete();
+
+        StepVerifier.create(hostGraphController.hostById("hostId",false))
+                .expectNext(responseNoUserInfo)
+                .verifyComplete();
+    }
+
+    @Test
+    void createUpdateHost(){
+        Host host = new Host();
+        host.setHostId("hostId");
+        host.setUserId("userId");
+        User user = new User();
+        user.setUserId("userId");
+        HostUpdateRequest request = new HostUpdateRequest(host,user,Boolean.FALSE, Boolean.FALSE);
+
+        HostUpdateResponse response = new HostUpdateResponse("success", host, user);
+
+        Mockito.when(hostGraphService.createUpdateHost(request)).thenReturn(Mono.just(response));
+
+        StepVerifier.create(hostGraphController.createUpdateHost(request))
+                .expectNext(response)
+                .verifyComplete();
+
+    }
+}
