@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class HostResponse {
+public class HostUpdateResponse {
     private String message;
     private Host host;
     private User user;

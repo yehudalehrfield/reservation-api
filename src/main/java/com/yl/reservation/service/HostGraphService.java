@@ -79,7 +79,7 @@ public class HostGraphService {
 
     }
 
-    public Mono<HostResponse> createUpdateHost(HostUpdateRequest hostUpdateRequest) {
+    public Mono<HostUpdateResponse> createUpdateHost(HostUpdateRequest hostUpdateRequest) {
         String createUpdateDateTime = ResUtil.getCurrentDateTimeString();
         // check if host is in the request; throw an error if not.
         if (hostUpdateRequest.getHost() == null && hostUpdateRequest.getUser() == null) {
@@ -89,57 +89,63 @@ public class HostGraphService {
         if (hostUpdateRequest.getHost() != null) {
             //todo: can i make this into one method?
             if (hostUpdateRequest.getHost().getHostId() != null) {
-                return hostRepositoryReactive.findByHostId(hostUpdateRequest.getHost().getHostId())
-                        .flatMap(hostToUpdate -> {
-                            Host updatedHost = ResUtil.updateHost(hostToUpdate, hostUpdateRequest.getHost(),
-                                    hostUpdateRequest.getIsAddressUpdate(), createUpdateDateTime);
-                            if (Boolean.TRUE.equals(hostUpdateRequest.getIsUserUpdate())) {
-                                return zipUserUpdateWithHostUpdate(hostUpdateRequest, hostToUpdate, updatedHost, createUpdateDateTime);
-                            }
-                            return hostRepositoryReactive.save(updatedHost)
-                                    .flatMap(host -> Mono.just(new HostResponse(ResConstants.HOST_UPDATE + host.getHostId(), host, null)));
-                        })
-                        .onErrorResume(error -> Mono.error(new GraphQLException(error.getMessage(),
-                                HttpStatus.BAD_REQUEST)))
-                        .switchIfEmpty(Mono.error(new GraphQLException(ResConstants.HOST_NOT_FOUND_WITH_ID + hostUpdateRequest.getHost().getHostId(), HttpStatus.BAD_REQUEST)));
+                return updateHostByHostId(hostUpdateRequest, createUpdateDateTime);
             } else if (hostUpdateRequest.getHost().getUserId() != null && hostUpdateRequest.getHost().getAddress() != null) {
                 if (Boolean.TRUE.equals(hostUpdateRequest.getIsAddressUpdate())) {
                     throw new GraphQLException(ResConstants.HOST_ID_REQUIRED_FOR_ADDRESS_ERROR, HttpStatus.BAD_REQUEST);
                 }
-                return hostRepositoryReactive.findByUserIdAndAddress(hostUpdateRequest.getHost().getUserId(),
-                                hostUpdateRequest.getHost().getAddress())
-                        //todo: in the flatmap, check if it is also a userUpdate, mono.zip if so... else just update
-                        // host...
-                        .flatMap(hostToUpdate -> {
-                            Host updatedHost = ResUtil.updateHost(hostToUpdate, hostUpdateRequest.getHost(),
-                                    hostUpdateRequest.getIsAddressUpdate(), createUpdateDateTime);
-                            if (Boolean.TRUE.equals(hostUpdateRequest.getIsUserUpdate())) {
-                                return zipUserUpdateWithHostUpdate(hostUpdateRequest, hostToUpdate, updatedHost, createUpdateDateTime);
-                            }
-                            return hostRepositoryReactive.save(updatedHost)
-                                    .flatMap(savedHost -> Mono.just(new HostResponse(ResConstants.HOST_UPDATE + savedHost.getId(), savedHost, null)));
-                        })
-                        .onErrorResume(error -> Mono.error(new GraphQLException(error.getMessage(),
-                                HttpStatus.BAD_REQUEST)))
-                        .switchIfEmpty(createNewHost(hostUpdateRequest, createUpdateDateTime));
+                return updateHostByUserIdAndAddress(hostUpdateRequest, createUpdateDateTime);
             } else {
                 throw new GraphQLException(ResConstants.HOST_NO_IDENTIFYING_ERROR, HttpStatus.BAD_REQUEST);
             }
         }
         // no host is given. user must be given. update user.
         else {
-            if (Boolean.FALSE.equals(hostUpdateRequest.getIsUserUpdate())) {
-                throw new GraphQLException(ResConstants.USER_UPDATE_ERROR, HttpStatus.BAD_REQUEST);
-            }
             return updateUserInfo(hostUpdateRequest, null, createUpdateDateTime)
-                    .map(user -> new HostResponse((user.getLastUpdated().equals(user.getCreatedDate()) ?
+                    .map(user -> new HostUpdateResponse((user.getLastUpdated().equals(user.getCreatedDate()) ?
                             ResConstants.USER_CREATE : ResConstants.USER_UPDATE) + user.getUserId(), null, user));
 
         }
 
     }
 
+    private Mono<HostUpdateResponse> updateHostByUserIdAndAddress(HostUpdateRequest hostUpdateRequest, String createUpdateDateTime) {
+        return hostRepositoryReactive.findByUserIdAndAddress(hostUpdateRequest.getHost().getUserId(),
+                        hostUpdateRequest.getHost().getAddress())
+                .flatMap(hostToUpdate -> {
+                    Host updatedHost = ResUtil.updateHost(hostToUpdate, hostUpdateRequest.getHost(),
+                            hostUpdateRequest.getIsAddressUpdate(), createUpdateDateTime);
+                    if (Boolean.TRUE.equals(hostUpdateRequest.getIsUserUpdate())) {
+                        return zipUserUpdateWithHostUpdate(hostUpdateRequest, hostToUpdate, updatedHost, createUpdateDateTime);
+                    }
+                    return hostRepositoryReactive.save(updatedHost)
+                            .flatMap(savedHost -> Mono.just(new HostUpdateResponse(ResConstants.HOST_UPDATE + savedHost.getId(), savedHost, null)));
+                })
+                .onErrorResume(error -> Mono.error(new GraphQLException(error.getMessage(),
+                        HttpStatus.BAD_REQUEST)))
+                .switchIfEmpty(createNewHost(hostUpdateRequest, createUpdateDateTime));
+    }
+
+    private Mono<HostUpdateResponse> updateHostByHostId(HostUpdateRequest hostUpdateRequest, String createUpdateDateTime) {
+        return hostRepositoryReactive.findByHostId(hostUpdateRequest.getHost().getHostId())
+                .flatMap(hostToUpdate -> {
+                    Host updatedHost = ResUtil.updateHost(hostToUpdate, hostUpdateRequest.getHost(),
+                            hostUpdateRequest.getIsAddressUpdate(), createUpdateDateTime);
+                    if (Boolean.TRUE.equals(hostUpdateRequest.getIsUserUpdate())) {
+                        return zipUserUpdateWithHostUpdate(hostUpdateRequest, hostToUpdate, updatedHost, createUpdateDateTime);
+                    }
+                    return hostRepositoryReactive.save(updatedHost)
+                            .flatMap(host -> Mono.just(new HostUpdateResponse(ResConstants.HOST_UPDATE + host.getHostId(), host, null)));
+                })
+                .onErrorResume(error -> Mono.error(new GraphQLException(error.getMessage(),
+                        HttpStatus.BAD_REQUEST)))
+                .switchIfEmpty(Mono.error(new GraphQLException(ResConstants.HOST_NOT_FOUND_WITH_ID + hostUpdateRequest.getHost().getHostId(), HttpStatus.BAD_REQUEST)));
+    }
+
     private Mono<User> updateUserInfo(HostUpdateRequest hostUpdateRequest, String userId, String createUpdateDateTime) {
+        if (Boolean.FALSE.equals(hostUpdateRequest.getIsUserUpdate())) {
+            throw new GraphQLException(ResConstants.USER_UPDATE_ERROR, HttpStatus.BAD_REQUEST);
+        }
         if (hostUpdateRequest.getUser().getUserId() != null || userId != null) {
             String userIdToSearch = (userId != null) ? userId : hostUpdateRequest.getUser().getUserId();
             return userRepositoryReactive.findByUserId(userIdToSearch)
@@ -180,14 +186,14 @@ public class HostGraphService {
         }
     }
 
-    private Mono<HostResponse> createNewHost(HostUpdateRequest hostUpdateRequest, String createDateTime) {
+    private Mono<HostUpdateResponse> createNewHost(HostUpdateRequest hostUpdateRequest, String createDateTime) {
         ResUtil.validateHostInfo(hostUpdateRequest.getHost());
         Host host = hostUpdateRequest.getHost();
         host.setHostId(ResUtil.generateId());
         host.setCreatedDate(createDateTime);
         host.setLastUpdated(createDateTime);
         return hostRepositoryReactive.save(host)
-                .map(newHost -> new HostResponse(ResConstants.HOST_CREATE + host.getHostId(), newHost, null));
+                .map(newHost -> new HostUpdateResponse(ResConstants.HOST_CREATE + host.getHostId(), newHost, null));
     }
 
     private Mono<User> createNewUser(HostUpdateRequest hostUpdateRequest, String createDateTime) {
@@ -199,9 +205,9 @@ public class HostGraphService {
         return userRepositoryReactive.save(user);
     }
 
-    private Mono<HostResponse> zipUserUpdateWithHostUpdate(HostUpdateRequest hostUpdateRequest, Host hostToUpdate,
-                                                           Host updatedHost,
-                                                           String createUpdateDateTime) {
+    private Mono<HostUpdateResponse> zipUserUpdateWithHostUpdate(HostUpdateRequest hostUpdateRequest, Host hostToUpdate,
+                                                                 Host updatedHost,
+                                                                 String createUpdateDateTime) {
         if (hostUpdateRequest.getUser() == null) {
             throw new GraphQLException("No user in request...", HttpStatus.BAD_REQUEST);
         }
@@ -211,7 +217,7 @@ public class HostGraphService {
                 .flatMap(user -> hostRepositoryReactive.save(updatedHost)
                         .zipWith(Mono.just(user))
                         .flatMap(hostAndUserTuple ->
-                                Mono.just(new HostResponse(
+                                Mono.just(new HostUpdateResponse(
                                         ResConstants.HOST_UPDATE + hostAndUserTuple.getT1().getHostId(),
                                         hostAndUserTuple.getT1(),
                                         hostAndUserTuple.getT2())
@@ -221,15 +227,15 @@ public class HostGraphService {
 
     }
 
-    private Mono<HostResponse> createNewHostOrApplyAddressUpdate(HostUpdateRequest hostUpdateRequest,
-                                                                 String createUpdateDateTime) {
+    private Mono<HostUpdateResponse> createNewHostOrApplyAddressUpdate(HostUpdateRequest hostUpdateRequest,
+                                                                       String createUpdateDateTime) {
         return doesUserExist(hostUpdateRequest).flatMap(user -> {
             System.out.println("User Exists.");
             //todo: user updates if applicable
             //todo: what if it's an address update?
             if (hostUpdateRequest.getIsAddressUpdate()) {
                 System.out.println("GOTTA FIGURE THIS OUT");
-                return Mono.just(new HostResponse("Address Update", null, null));
+                return Mono.just(new HostUpdateResponse("Address Update", null, null));
             } else {
                 //todo refactor: createHost
                 return proceedWithCreateHost(hostUpdateRequest, createUpdateDateTime);
@@ -237,17 +243,17 @@ public class HostGraphService {
         }).switchIfEmpty(createUserAndHost(hostUpdateRequest, createUpdateDateTime)).onErrorResume(error -> Mono.error(new GraphQLException(error.getMessage(), HttpStatus.BAD_REQUEST)));
     }
 
-    private Mono<? extends HostResponse> createUserAndHost(HostUpdateRequest hostUpdateRequest,
-                                                           String createUpdateDateTime) {
+    private Mono<? extends HostUpdateResponse> createUserAndHost(HostUpdateRequest hostUpdateRequest,
+                                                                 String createUpdateDateTime) {
         // validate User, firstname, lastname, primaryContact, phone or email
         ResUtil.validateUserInfo(hostUpdateRequest.getUser());
         ResUtil.validateHostCreationFields(hostUpdateRequest);
         userRepositoryReactive.save(hostUpdateRequest.getUser());
-        return hostRepositoryReactive.save(hostUpdateRequest.getHost()).flatMap(host -> Mono.just(new HostResponse(
+        return hostRepositoryReactive.save(hostUpdateRequest.getHost()).flatMap(host -> Mono.just(new HostUpdateResponse(
                 "Created host: " + host.getHostId(), host, hostUpdateRequest.getUser())));
     }
 
-    private Mono<HostResponse> proceedWithCreateHost(HostUpdateRequest hostUpdateRequest, String createUpdateDateTime) {
+    private Mono<HostUpdateResponse> proceedWithCreateHost(HostUpdateRequest hostUpdateRequest, String createUpdateDateTime) {
         //todo: new validation -> userId, address
 //        HostUtil.validateHostCreationFields(hostUpdateRequest);
 
@@ -255,7 +261,7 @@ public class HostGraphService {
         updatedHost.setHostId(ResUtil.generateId());
         updatedHost.setCreatedDate(createUpdateDateTime);
         updatedHost.setLastUpdated(createUpdateDateTime);
-        return hostRepositoryReactive.save(updatedHost).flatMap(savedHost -> Mono.just(new HostResponse("Created host" +
+        return hostRepositoryReactive.save(updatedHost).flatMap(savedHost -> Mono.just(new HostUpdateResponse("Created host" +
                 " " + savedHost.getId(), savedHost, null)));
     }
 

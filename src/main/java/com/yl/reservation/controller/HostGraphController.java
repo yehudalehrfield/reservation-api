@@ -1,9 +1,8 @@
  package com.yl.reservation.controller;
 
 import com.yl.reservation.exception.GraphQLException;
-import com.yl.reservation.model.Host;
 import com.yl.reservation.service.HostGraphService;
-import com.yl.reservation.service.HostResponse;
+import com.yl.reservation.service.HostUpdateResponse;
 import com.yl.reservation.service.HostSearchResponse;
 import com.yl.reservation.service.HostUpdateRequest;
 import org.slf4j.Logger;
@@ -14,7 +13,6 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -45,7 +43,7 @@ public class HostGraphController {
 
     @MutationMapping
     //todo: logging
-    public Mono<HostResponse> createUpdateHost(@Argument HostUpdateRequest hostUpdateRequest){
+    public Mono<HostUpdateResponse> createUpdateHost(@Argument HostUpdateRequest hostUpdateRequest){
         return hostGraphService.createUpdateHost(hostUpdateRequest);
     }
 
