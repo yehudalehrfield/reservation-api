@@ -87,12 +87,11 @@ public class HostGraphService {
         }
         // check for host in request
         if (hostUpdateRequest.getHost() != null) {
-            //todo: can i make this into one method?
             if (hostUpdateRequest.getHost().getHostId() != null) {
                 return updateHostByHostId(hostUpdateRequest, createUpdateDateTime);
             } else if (hostUpdateRequest.getHost().getUserId() != null && hostUpdateRequest.getHost().getAddress() != null) {
                 if (Boolean.TRUE.equals(hostUpdateRequest.getIsAddressUpdate())) {
-                    throw new GraphQLException(ResConstants.HOST_ID_REQUIRED_FOR_ADDRESS_ERROR, HttpStatus.BAD_REQUEST);
+                    throw new GraphQLException(ResConstants.HOST_ID_REQUIRED_FOR_ADDRESS_UPDATE_ERROR, HttpStatus.BAD_REQUEST);
                 }
                 return updateHostByUserIdAndAddress(hostUpdateRequest, createUpdateDateTime);
             } else {
