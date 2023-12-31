@@ -1,76 +1,52 @@
-package com.yl.reservation.controller;
+ package com.yl.reservation.controller;
 
-import com.yl.reservation.exception.HostException;
-import com.yl.reservation.model.Host;
-import com.yl.reservation.service.HostUpdateRequest;
-import com.yl.reservation.service.HostResponse;
+import com.yl.reservation.exception.GraphQLException;
 import com.yl.reservation.service.HostService;
-import com.yl.reservation.util.HostConstants;
+import com.yl.reservation.service.HostUpdateResponse;
+import com.yl.reservation.service.HostSearchResponse;
+import com.yl.reservation.service.HostUpdateRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/api/v1/hosts")
 public class HostController {
+
     @Autowired
     HostService hostService;
 
-    @GetMapping()
-    public ResponseEntity<List<Host>> getHosts() {
-        return new ResponseEntity<>(hostService.getHosts(), HttpStatus.OK);
+    private static final Logger logger = LoggerFactory.getLogger(HostController.class);
+    @QueryMapping
+    public Mono<HostSearchResponse> getAllHosts(@Argument boolean includeUserInfo){
+        return hostService.getAllHosts(includeUserInfo)
+                .switchIfEmpty(Mono.error(new GraphQLException("No Hosts Found", HttpStatus.NOT_FOUND)))
+                .doOnNext(res -> logger.info(String.valueOf(res)))
+                .doFinally(res -> logger.info("Search for all hosts with response: {}",res))
+                .cache();
+    }
+    @QueryMapping
+    public Mono<HostSearchResponse> hostById(@Argument String hostId, @Argument boolean includeUserInfo){
+        //todo: fix logging
+        return hostService.getHostById(hostId, includeUserInfo)
+                .switchIfEmpty(Mono.error(new GraphQLException("Host not found with id: " + hostId, HttpStatus.NOT_FOUND)))
+                .doOnNext(res -> logger.info(String.valueOf(res)))
+                .doFinally(res -> logger.info("Search for host with id: {}, response: {}", hostId, res))
+                .cache();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<HostResponse> findHost(@PathVariable("id") String id){
-        HostResponse hostResponse = new HostResponse();
-        try {
-            Host host = hostService.getHostById(id);
-            hostResponse.setHost(host);
-            if (host == null) {
-                hostResponse.setMessage("Could not find host " + id);
-            } else {
-                hostResponse.setMessage("Retrieved host " + id);
-            }
-            return new ResponseEntity<>(hostResponse,HttpStatus.OK);
-        } catch (Exception ex){
-            hostResponse.setMessage(HostConstants.GENERAL_HOST_ERROR);
-            return new ResponseEntity<>(hostResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    @MutationMapping
+    //todo: logging
+    public Mono<HostUpdateResponse> createUpdateHost(@Argument HostUpdateRequest hostUpdateRequest){
+        return hostService.createUpdateHost(hostUpdateRequest);
     }
 
-    @PostMapping("/update")
-    public ResponseEntity<HostResponse> updateHost(@RequestBody HostUpdateRequest request) {
-        HostResponse response = new HostResponse();
-        HttpStatus status;
-        try {
-            response = hostService.updateHost(request);
-            status = HttpStatus.OK;
-        } catch (HostException ex) {
-            //todo: logging
-            response.setMessage(ex.getMessage());
-            status = ex.getStatus();
-        } catch (Exception ex) {
-            //todo: logging
-            response.setMessage(HostConstants.GENERAL_HOST_ERROR);
-            status = HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-        return new ResponseEntity<>(response,status);
-    }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<HostResponse> deleteHost(@PathVariable("id") String id) {
-        HostResponse hostResponse = new HostResponse();
 
-        hostService.deleteHost(id).ifPresentOrElse(host -> {
-            hostResponse.setHost(host);
-            hostResponse.setMessage("Successfully deleted host");
-        }, () -> hostResponse.setMessage("No host found to delete"));
 
-        return new ResponseEntity<>(hostResponse, HttpStatus.OK);
-
-    }
 }

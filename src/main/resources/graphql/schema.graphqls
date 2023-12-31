@@ -1,6 +1,6 @@
 type Query {
-    hostById(id: ID!): Host
-    getAllHosts: [Host]
+    hostById(hostId: String!, includeUserInfo: Boolean = false): HostSearchResponse
+    getAllHosts(includeUserInfo: Boolean = false): HostSearchResponse
 }
 
 type Mutation{
@@ -9,41 +9,58 @@ type Mutation{
 
 type Host {
     id: ID
-    firstName: String
-    lastName: String
-    phone: [Phone]
-    email: [Email]
+    hostId: String
+    userId: String
     address: Address
     beds: Int
     crib: Boolean
     fullBath: Boolean
     privateEntrance: Boolean
     notes: String
-    primaryContactMethod: ContactMethod
     createdDate: String
     lastUpdated: String
 }
 
-input HostInput {
+type User {
     id: ID
+    userId: String
     firstName: String
     lastName: String
-    phone: [PhoneInput]
-    email: [EmailInput]
+    phone: [Phone]
+    email: [Email]
+    primaryContactMethod: ContactMethod
+    createdDate: String
+    lastUpdated: String
+
+}
+
+input HostInput {
+    id: ID
+    hostId: String
+    userId: String
     address: AddressInput
     beds: Int
     crib: Boolean
     fullBath: Boolean
     privateEntrance: Boolean
     notes: String
+}
+
+input UserInput{
+    id: ID
+    userId: String
+    lastName: String
+    firstName: String
+    phone: [PhoneInput]
+    email: [EmailInput]
     primaryContactMethod: ContactMethod
-    createdDate: String
-    lastUpdated: String
 }
 
 input HostUpdateRequest{
-    isAddressUpdate: Boolean
-    host: HostInput!
+    isAddressUpdate: Boolean = false
+    isUserUpdate: Boolean = false
+    host: HostInput
+    user: UserInput
 }
 
 type Phone {
@@ -100,5 +117,16 @@ enum ContactMethod {
 type HostResponse{
     message: String
     host: Host
+    user: User
+}
+
+type HostSearchResponse{
+    message: String
+    hostDetails: [HostDetails]
+}
+
+type HostDetails{
+    host: Host
+    user: User
 }
 

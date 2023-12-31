@@ -1,27 +1,21 @@
 package com.yl.reservation.controller;
 
-import com.yl.reservation.exception.HostException;
 import com.yl.reservation.model.Host;
-import com.yl.reservation.service.HostUpdateRequest;
-import com.yl.reservation.repository.HostRepository;
-import com.yl.reservation.service.HostResponse;
-import com.yl.reservation.service.HostService;
-import org.junit.jupiter.api.Assertions;
+import com.yl.reservation.model.User;
+import com.yl.reservation.service.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
-class HostControllerTest {
+public class HostControllerTest {
 
     @InjectMocks
     HostController hostController;
@@ -29,116 +23,83 @@ class HostControllerTest {
     @Mock
     HostService hostService;
 
-    @Mock
-    HostRepository hostRepository;
-
     @Test
-    void getHosts() {
-        List<Host> hosts = new ArrayList<>();
+    void getAllHosts(){
         Host host1 = new Host();
-        host1.setLastName("smith");
-        host1.setFirstName("joe");
+        host1.setHostId("id1");
+        host1.setUserId("userId1");
         Host host2 = new Host();
-        host2.setLastName("doe");
-        host2.setFirstName("john");
+        host2.setHostId("id2");
+        host2.setUserId("userId2");
 
-        hosts.add(host1);
-        hosts.add(host2);
+        User user1 = new User();
+        user1.setUserId("userId1");
+        User user2 = new User();
+        user2.setUserId("userId2");
 
-        Mockito.when(hostService.getHosts()).thenReturn(hosts);
+        HostDetails hostDetails1 = new HostDetails(host1, user1);
+        HostDetails hostDetails2 = new HostDetails(host2, user2);
+        HostDetails hostDetails3 = new HostDetails(host1, null);
+        HostDetails hostDetails4 = new HostDetails(host2, null);
 
-        ResponseEntity<List<Host>> resp = hostController.getHosts();
 
-        Assertions.assertEquals(resp.getBody(), hosts);
+        HostSearchResponse responseUserInfo = new HostSearchResponse("success", List.of(hostDetails1,hostDetails2));
+        HostSearchResponse responseNoUserInfo = new HostSearchResponse("success",List.of(hostDetails3, hostDetails4));
 
+        Mockito.when(hostService.getAllHosts(true)).thenReturn(Mono.just(responseUserInfo));
+        Mockito.when(hostService.getAllHosts(false)).thenReturn(Mono.just(responseNoUserInfo));
+
+        StepVerifier.create(hostController.getAllHosts(true))
+                .expectNext(responseUserInfo)
+                .verifyComplete();
+
+        StepVerifier.create(hostController.getAllHosts(false))
+                .expectNext(responseNoUserInfo)
+                .verifyComplete();
     }
 
     @Test
-    void findHost() {
+    void getHostById(){
         Host host = new Host();
-        host.setLastName("smith");
-        host.setFirstName("Joe");
-        host.setId("abc");
+        host.setHostId("hostId");
+        host.setUserId("userId");
+        User user = new User();
+        user.setUserId("userId");
+        HostDetails hostDetails = new HostDetails(host, user);
+        HostDetails hostDetails2 = new HostDetails(host, null);
 
-        Mockito.when(hostService.getHostById(Mockito.anyString())).thenReturn(host, null);
-//        Mockito.when(hostService.getHostById("error")).thenThrow(new RuntimeException());
+        HostSearchResponse responseUserInfo = new HostSearchResponse("success",List.of(hostDetails));
 
-        ResponseEntity<HostResponse> resp = hostController.findHost("abc");
-        ResponseEntity<HostResponse> resp1 = hostController.findHost("bogus");
+        HostSearchResponse responseNoUserInfo = new HostSearchResponse("success",List.of(hostDetails2));
 
+        Mockito.when(hostService.getHostById("hostId",true)).thenReturn(Mono.just(responseUserInfo));
+        Mockito.when(hostService.getHostById("hostId",false)).thenReturn(Mono.just(responseNoUserInfo));
 
-        HostResponse expectedResponse = new HostResponse("Retrieved host abc", host);
-        HostResponse expectedNotFound = new HostResponse("Could not find host bogus", null);
+        StepVerifier.create(hostController.hostById("hostId",true))
+                .expectNext(responseUserInfo)
+                .verifyComplete();
 
-        Assertions.assertEquals(resp.getBody(), expectedResponse);
-        Assertions.assertEquals(resp1.getBody(), expectedNotFound);
-
+        StepVerifier.create(hostController.hostById("hostId",false))
+                .expectNext(responseNoUserInfo)
+                .verifyComplete();
     }
 
     @Test
-    void findHostException() {
-        Mockito.when(hostService.getHostById(Mockito.anyString())).thenThrow(new RuntimeException());
-
-        HostResponse expectedResponse = new HostResponse("Sorry, something went wrong with host api...", null);
-
-        ResponseEntity<HostResponse> resp = hostController.findHost("error");
-
-        Assertions.assertEquals(resp.getBody(), expectedResponse);
-
-    }
-
-    @Test
-    void update() {
-        HostUpdateRequest request = new HostUpdateRequest();
+    void createUpdateHost(){
         Host host = new Host();
-        host.setId("abc");
-        host.setLastName("smith");
-        request.setHost(host);
+        host.setHostId("hostId");
+        host.setUserId("userId");
+        User user = new User();
+        user.setUserId("userId");
+        HostUpdateRequest request = new HostUpdateRequest(host,user,Boolean.FALSE, Boolean.FALSE);
 
-//        Mockito.when(hostRepository.findByLastNameAndAddress(Mockito.anyString(), Mockito.any())).thenReturn(Optional.of(host));
-        HostResponse expectedResp = new HostResponse("Updated host abc", host);
-        Mockito.when(hostService.updateHost(request)).thenReturn(expectedResp);
+        HostUpdateResponse response = new HostUpdateResponse("success", host, user);
 
-        ResponseEntity<HostResponse> resp = hostController.updateHost(request);
+        Mockito.when(hostService.createUpdateHost(request)).thenReturn(Mono.just(response));
 
-        Assertions.assertEquals(resp.getBody(), expectedResp);
+        StepVerifier.create(hostController.createUpdateHost(request))
+                .expectNext(response)
+                .verifyComplete();
+
     }
-
-    @Test
-    void updateHostException(){
-        HostUpdateRequest request = new HostUpdateRequest();
-        Mockito.when(hostService.updateHost(request)).thenThrow(new HostException(HttpStatus.BAD_REQUEST, "No host included in the request"));
-//        Assertions.assertThrows(HostException.class,()->hostController.updateHost(request));
-        ResponseEntity resp = hostController.updateHost(request);
-        Assertions.assertEquals(resp.getBody(), new HostResponse("No host included in the request",null));
-    }
-
-    @Test
-    void updateException(){
-        HostUpdateRequest request = new HostUpdateRequest();
-        Mockito.when(hostService.updateHost(request)).thenThrow(new RuntimeException());
-//        Assertions.assertThrows(HostException.class,()->hostController.updateHost(request));
-        ResponseEntity resp = hostController.updateHost(request);
-        Assertions.assertEquals(resp.getBody(), new HostResponse("Sorry, something went wrong with host api...",null));
-    }
-
-    @Test
-    void deleteHost(){
-        Host host = new Host();
-        host.setId("abc");
-        HostResponse expectedResponse = new HostResponse("Successfully deleted host",host);
-        Mockito.when(hostService.deleteHost(Mockito.anyString())).thenReturn(Optional.of(host));
-        Assertions.assertEquals(hostController.deleteHost("abc").getBody(),expectedResponse);
-    }
-
-    @Test
-    void deleteHostNotFound(){
-        Host host = new Host();
-        host.setId("abc");
-        HostResponse expectedResponse = new HostResponse("No host found to delete",null);
-        Mockito.when(hostService.deleteHost(Mockito.anyString())).thenReturn(Optional.empty());
-        Assertions.assertEquals(hostController.deleteHost("abc").getBody(),expectedResponse);
-    }
-
 }
-

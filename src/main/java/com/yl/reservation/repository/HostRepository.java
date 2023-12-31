@@ -2,21 +2,17 @@ package com.yl.reservation.repository;
 
 import com.yl.reservation.model.Address;
 import com.yl.reservation.model.Host;
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.Optional;
+public interface HostRepository extends ReactiveMongoRepository<Host, String> {
+    Mono<Host> findByUserIdAndAddress(String userId, Address address);
 
-@Repository
-public interface HostRepository extends MongoRepository<Host, String> {
-    Optional<Host> findByLastNameAndAddress(String lastName, Address address);
+    Mono<Host> findByHostId(String hostId);
 
-    @Query(value = "{$and: [{'lastName': ?0}, { 'phone' : {$elemMatch: { 'value' : ?1} } }] }")
-    List<Host> findByLastNameAndPrimaryPhone(String lastName, String phone);
+//    @Query(value = "{$and: [{'lastName': ?0}, { 'phone' : {$elemMatch: { 'value' : ?1} } }] }")
+//    Flux<Host> findByLastNameAndPrimaryPhone(String lastName, String phone);
 
-    @Query(value = "{$and: [{'lastName': ?0}, { 'email' : {$elemMatch: { 'value' : ?1} } }] }")
-    List<Host> findByLastNameAndPrimaryEmail(String lastName, String email);
+//    @Query(value = "{$and: [{'lastName': ?0}, { 'email' : {$elemMatch: { 'value' : ?1} } }] }")
+//    Flux<Host> findByLastNameAndPrimaryEmail(String lastName, String email);
 }
