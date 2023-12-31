@@ -15,13 +15,13 @@ import reactor.test.StepVerifier;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
-public class HostGraphControllerTest {
+public class HostControllerTest {
 
     @InjectMocks
-    HostGraphController hostGraphController;
+    HostController hostController;
 
     @Mock
-    HostGraphService hostGraphService;
+    HostService hostService;
 
     @Test
     void getAllHosts(){
@@ -46,14 +46,14 @@ public class HostGraphControllerTest {
         HostSearchResponse responseUserInfo = new HostSearchResponse("success", List.of(hostDetails1,hostDetails2));
         HostSearchResponse responseNoUserInfo = new HostSearchResponse("success",List.of(hostDetails3, hostDetails4));
 
-        Mockito.when(hostGraphService.getAllHosts(true)).thenReturn(Mono.just(responseUserInfo));
-        Mockito.when(hostGraphService.getAllHosts(false)).thenReturn(Mono.just(responseNoUserInfo));
+        Mockito.when(hostService.getAllHosts(true)).thenReturn(Mono.just(responseUserInfo));
+        Mockito.when(hostService.getAllHosts(false)).thenReturn(Mono.just(responseNoUserInfo));
 
-        StepVerifier.create(hostGraphController.getAllHosts(true))
+        StepVerifier.create(hostController.getAllHosts(true))
                 .expectNext(responseUserInfo)
                 .verifyComplete();
 
-        StepVerifier.create(hostGraphController.getAllHosts(false))
+        StepVerifier.create(hostController.getAllHosts(false))
                 .expectNext(responseNoUserInfo)
                 .verifyComplete();
     }
@@ -72,14 +72,14 @@ public class HostGraphControllerTest {
 
         HostSearchResponse responseNoUserInfo = new HostSearchResponse("success",List.of(hostDetails2));
 
-        Mockito.when(hostGraphService.getHostById("hostId",true)).thenReturn(Mono.just(responseUserInfo));
-        Mockito.when(hostGraphService.getHostById("hostId",false)).thenReturn(Mono.just(responseNoUserInfo));
+        Mockito.when(hostService.getHostById("hostId",true)).thenReturn(Mono.just(responseUserInfo));
+        Mockito.when(hostService.getHostById("hostId",false)).thenReturn(Mono.just(responseNoUserInfo));
 
-        StepVerifier.create(hostGraphController.hostById("hostId",true))
+        StepVerifier.create(hostController.hostById("hostId",true))
                 .expectNext(responseUserInfo)
                 .verifyComplete();
 
-        StepVerifier.create(hostGraphController.hostById("hostId",false))
+        StepVerifier.create(hostController.hostById("hostId",false))
                 .expectNext(responseNoUserInfo)
                 .verifyComplete();
     }
@@ -95,9 +95,9 @@ public class HostGraphControllerTest {
 
         HostUpdateResponse response = new HostUpdateResponse("success", host, user);
 
-        Mockito.when(hostGraphService.createUpdateHost(request)).thenReturn(Mono.just(response));
+        Mockito.when(hostService.createUpdateHost(request)).thenReturn(Mono.just(response));
 
-        StepVerifier.create(hostGraphController.createUpdateHost(request))
+        StepVerifier.create(hostController.createUpdateHost(request))
                 .expectNext(response)
                 .verifyComplete();
 
