@@ -4,6 +4,7 @@ import com.yl.reservation.exception.GraphQLException;
 import com.yl.reservation.model.*;
 import com.yl.reservation.repository.HostRepository;
 import com.yl.reservation.repository.UserRepository;
+import com.yl.reservation.util.RequestValidatorService;
 import com.yl.reservation.util.ResConstants;
 import com.yl.reservation.util.ResUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -194,7 +195,7 @@ public class HostService {
     }
 
     private Mono<HostUpdateResponse> createNewHost(HostUpdateRequest hostUpdateRequest, String createDateTime) {
-        ResUtil.validateHostInfo(hostUpdateRequest.getHost());
+        RequestValidatorService.validateHostInfo(hostUpdateRequest.getHost());
         Host host = hostUpdateRequest.getHost();
         host.setHostId(ResUtil.generateId());
         host.setCreatedDate(createDateTime);
@@ -204,7 +205,7 @@ public class HostService {
     }
 
     private Mono<User> createNewUser(HostUpdateRequest hostUpdateRequest, String createDateTime) {
-        ResUtil.validateUserInfo(hostUpdateRequest.getUser());
+        RequestValidatorService.validateUserInfo(hostUpdateRequest.getUser());
         User user = hostUpdateRequest.getUser();
         user.setUserId(ResUtil.generateId());
         user.setCreatedDate(createDateTime);

@@ -22,4 +22,7 @@ public class ResConstants {
     public static final String USER_UPDATE = "Updated user ";
     public static final String USER_CREATE = "Created user ";
     public static final String USER_NOT_FOUND_WITH_ID = "No user with id: ";
+
+//    UTIL
+//    public static
 }

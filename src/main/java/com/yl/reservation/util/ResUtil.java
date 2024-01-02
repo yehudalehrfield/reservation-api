@@ -22,11 +22,6 @@ public class ResUtil {
         return LocalDateTime.now().toString();
     }
 
-    public static void validateHostCreationFields(HostUpdateRequest request) throws HostException {
-        if (request.getHost() == null) throw new HostException(HttpStatus.BAD_REQUEST, "No host");
-//        validatePrimaryInfo(request);
-//        validateContactInfo(request);
-    }
 
     public static void validateContactInfo(User user){
         boolean hasEmail = user.getEmail() != null && StringUtils.hasText(user.getEmail().get(0).getValue());
@@ -102,34 +97,6 @@ public class ResUtil {
 
             return hostToUpdate;
         }
-    }
-
-    public static Host updateHostFields(Host updatedHost, Host requestHost, boolean isAddressUpdate) {
-        if (!isHostUpdate(updatedHost, requestHost, isAddressUpdate)) {
-            //todo: only throw this exception if there are also no user updates
-//            throw new HostException(HttpStatus.OK, "No updates to apply");
-            logger.info("No host updates to apply.");
-            return null;
-        } else {
-            if (requestHost.getAddress() != null) updatedHost.setAddress(requestHost.getAddress());
-//            updateHostContactInfo(requestHost,updatedHost);
-            return updateHostInfo(requestHost,updatedHost);
-        }
-    }
-
-//    private static void updateHostContactInfo(Host requestHost, Host updatedHost){
-//        if (requestHost.getEmail() != null) updatedHost.setEmail(requestHost.getEmail());
-//        if (requestHost.getPhone() != null) updatedHost.setPhone(requestHost.getPhone());
-//        if (requestHost.getPrimaryContactMethod() != null) updatedHost.setPrimaryContactMethod(requestHost.getPrimaryContactMethod());
-//    }
-
-    private static Host updateHostInfo(Host requestHost, Host updatedHost){
-        if (requestHost.getBeds() > 0) updatedHost.setBeds(requestHost.getBeds());
-        if (requestHost.getNotes() != null) updatedHost.setNotes(requestHost.getNotes());
-        if (requestHost.getCrib() != null) updatedHost.setCrib(requestHost.getCrib());
-        if (requestHost.getFullBath() != null) updatedHost.setFullBath(requestHost.getFullBath());
-        if (requestHost.getPrivateEntrance() != null) updatedHost.setPrivateEntrance(requestHost.getPrivateEntrance());
-        return updatedHost;
     }
 
     public static String generateId() {
