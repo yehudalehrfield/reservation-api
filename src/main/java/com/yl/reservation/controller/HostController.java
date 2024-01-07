@@ -31,7 +31,7 @@ public class HostController {
                 .cache();
     }
     @QueryMapping
-    public Mono<HostSearchResponse> hostById(@Argument String hostId, @Argument boolean includeUserInfo){
+    public Mono<HostSearchResponse> getHostById(@Argument String hostId, @Argument boolean includeUserInfo){
         //todo: fix logging
         return hostService.getHostById(hostId, includeUserInfo)
                 .switchIfEmpty(Mono.error(new ResGraphException("Host not found with id: " + hostId, HttpStatus.NOT_FOUND)))

@@ -24,8 +24,8 @@ public class UserController {
     }
 
     @QueryMapping
-    Mono<UserResponse> getUserByUserId(@Argument String userId){
-        return userService.getUserByUserId(userId)
+    Mono<UserResponse> getUserById(@Argument String userId){
+        return userService.getUserById(userId)
                 .switchIfEmpty(Mono.error(new ResGraphException("User " + userId + " not found", HttpStatus.NOT_FOUND)))
                 .cache();
     }

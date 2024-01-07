@@ -166,14 +166,14 @@ public class HostService {
                     .switchIfEmpty(Mono.error(new ResGraphException(ResConstants.USER_NOT_FOUND_WITH_ID + hostUpdateRequest.getUser().getUserId(), HttpStatus.NOT_FOUND)));
         } else if (hostUpdateRequest.getUser().getLastName() != null && hostUpdateRequest.getUser().getPrimaryContactMethod() != null) {
             // todo: what if i want to update primary contact method? it'll create a new user here...
+            //  --> Don't allow primaryContactMethod update without useId...
             // find by lastName and primary contact if given in the request
             return fetchByPrimaryContactInfo(hostUpdateRequest)
                     .flatMap(user -> {
                         User updatedUser = ResUtil.updateUser(user, hostUpdateRequest.getUser(), createUpdateDateTime);
                         return userRepository.save(updatedUser);
                     })
-                    .onErrorResume(error -> Mono.error(new ResGraphException(error.getMessage(),
-                            HttpStatus.BAD_REQUEST)))
+                    .onErrorResume(error -> Mono.error(new ResGraphException(error.getMessage(), HttpStatus.BAD_REQUEST)))
                     // create new user if no user is found
                     .switchIfEmpty(Mono.defer(()-> createNewUser(hostUpdateRequest, createUpdateDateTime)));
         } else {

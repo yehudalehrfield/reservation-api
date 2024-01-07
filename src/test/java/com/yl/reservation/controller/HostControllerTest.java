@@ -75,11 +75,11 @@ public class HostControllerTest {
         Mockito.when(hostService.getHostById("hostId",true)).thenReturn(Mono.just(responseUserInfo));
         Mockito.when(hostService.getHostById("hostId",false)).thenReturn(Mono.just(responseNoUserInfo));
 
-        StepVerifier.create(hostController.hostById("hostId",true))
+        StepVerifier.create(hostController.getHostById("hostId",true))
                 .expectNext(responseUserInfo)
                 .verifyComplete();
 
-        StepVerifier.create(hostController.hostById("hostId",false))
+        StepVerifier.create(hostController.getHostById("hostId",false))
                 .expectNext(responseNoUserInfo)
                 .verifyComplete();
     }

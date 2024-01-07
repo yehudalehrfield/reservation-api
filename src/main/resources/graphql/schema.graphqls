@@ -1,10 +1,14 @@
 type Query {
-    hostById(hostId: String!, includeUserInfo: Boolean = false): HostSearchResponse
+    getHostById(hostId: String!, includeUserInfo: Boolean = false): HostSearchResponse
     getAllHosts(includeUserInfo: Boolean = false): HostSearchResponse
+    getUserById(userId: String!): UserResponse
+    getAllUsers: UserResponse
 }
 
 type Mutation{
     createUpdateHost(hostUpdateRequest: HostUpdateRequest): HostResponse
+    createUser(createUpdateUserRequest: CreateUpdateUserRequest): UserResponse
+    updateUser(createUpdateUserRequest: CreateUpdateUserRequest): UserResponse
 }
 
 type Host {
@@ -86,11 +90,13 @@ type Email {
     value: String
     isPrimary: Boolean
 }
+
 input EmailInput {
     type: EmailType
     value: String
     isPrimary: Boolean
 }
+
 enum EmailType {
     PERSONAL
     WORK
@@ -103,6 +109,7 @@ type Address {
     state: String
     zip: String
 }
+
 input AddressInput {
     addressLine1: String
     addressLine2: String
@@ -110,10 +117,12 @@ input AddressInput {
     state: String
     zip: String
 }
+
 enum ContactMethod {
     PHONE
     EMAIL
 }
+
 type HostResponse{
     message: String
     host: Host
@@ -130,3 +139,11 @@ type HostDetails{
     user: User
 }
 
+type UserResponse{
+    message: String
+    userList: User
+}
+
+input CreateUpdateUserRequest{
+    user: UserInput
+}
