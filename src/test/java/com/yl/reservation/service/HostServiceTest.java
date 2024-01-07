@@ -1,6 +1,5 @@
 package com.yl.reservation.service;
 
-import com.yl.reservation.exception.GraphQLException;
 import com.yl.reservation.model.*;
 import com.yl.reservation.repository.HostRepository;
 import com.yl.reservation.repository.UserRepository;

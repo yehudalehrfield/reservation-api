@@ -1,7 +1,7 @@
 package com.yl.reservation.util;
 
-import com.yl.reservation.exception.GraphQLException;
-import com.yl.reservation.exception.HostException;
+import com.yl.reservation.exception.ResGraphException;
+import com.yl.reservation.exception.ResException;
 import com.yl.reservation.model.ContactMethod;
 import com.yl.reservation.model.Host;
 import com.yl.reservation.model.User;
@@ -18,20 +18,32 @@ public class RequestValidatorService {
     private static final Pattern emailRegexPattern = Pattern.compile(
             "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
-    public static void validateUserInfo(User user) {
+    public static void validateCreateUserInfo(User user) {
         if (!StringUtils.hasText(user.getLastName()))
-            throw new HostException(HttpStatus.BAD_REQUEST, "Last name is blank or missing from the request");
+            throw new ResException("Last name is blank or missing from the request", HttpStatus.BAD_REQUEST);
         if (!StringUtils.hasText(user.getFirstName()))
-            throw new HostException(HttpStatus.BAD_REQUEST,"First name is blank or missing from the request");
+            throw new ResException("First name is blank or missing from the request", HttpStatus.BAD_REQUEST);
         validateContactInfo(user);
     }
 
-    public static void validateHostInfo(Host host) {
+    public static void validateUpdateUserInfo(User user) {
+        if (user.getPhone() != null) {
+            user.getPhone().forEach(phone -> validatePhoneNumber(phone.getValue()));
+        }
+        if (user.getEmail() != null) {
+            user.getEmail().forEach(email -> validateEmail(email.getValue()));
+        }
+        if (user.getPrimaryContactMethod() != null && user.getUserId() == null) {
+            throw new ResException("Cannot update primary contact method without userId", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public static void validateCreateHostInfo(Host host) {
         //todo: there may be a scenario where we will not need userId (if we are creating a user...)
         if (host.getUserId() == null)
-            throw new GraphQLException("userId is missing from the request", HttpStatus.BAD_REQUEST);
+            throw new ResGraphException("userId is missing from the request", HttpStatus.BAD_REQUEST);
         if (host.getAddress() == null)
-            throw new GraphQLException("Address is missing from the request", HttpStatus.BAD_REQUEST);
+            throw new ResGraphException("Address is missing from the request", HttpStatus.BAD_REQUEST);
     }
 
     public static void validateContactInfo(User user){
@@ -56,20 +68,20 @@ public class RequestValidatorService {
 
         boolean hasContactInfo = (hasEmail || hasPhone) && hasPrimaryContact;
         if (!hasContactInfo)
-            throw new HostException(HttpStatus.BAD_REQUEST,"Contact information is missing");
+            throw new ResException("Contact information is missing",HttpStatus.BAD_REQUEST);
     }
 
     public static void validatePhoneNumber(String phoneNumber){
         Matcher matchPhone = phoneRegexPattern.matcher(phoneNumber);
         if (!matchPhone.find()) {
-            throw new HostException(HttpStatus.BAD_REQUEST, "Invalid phone number: " + phoneNumber);
+            throw new ResException("Invalid phone number: " + phoneNumber,HttpStatus.BAD_REQUEST);
         }
     }
 
     public static void validateEmail(String email){
         Matcher matchPhone = emailRegexPattern.matcher(email);
         if (!matchPhone.find()) {
-            throw new HostException(HttpStatus.BAD_REQUEST, "Invalid email address: " + email);
+            throw new ResException("Invalid email address: " + email,HttpStatus.BAD_REQUEST);
         }
     }
 }

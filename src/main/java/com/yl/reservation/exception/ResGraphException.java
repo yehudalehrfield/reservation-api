@@ -12,10 +12,10 @@ import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class GraphQLException extends RuntimeException implements GraphQLError {
+public class ResGraphException extends RuntimeException implements GraphQLError {
     private final HttpStatus errorCode;
 
-    public GraphQLException(String description, HttpStatus errorCode) {
+    public ResGraphException(String description, HttpStatus errorCode) {
         super(description);
         this.errorCode = errorCode;
     }

@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties({"cause", "stackTrace","message","localizedMessage","suppressed"})
-public class HostException extends RuntimeException{
-    private HttpStatus status;
+public class ResException extends RuntimeException{
     private String message;
+    private HttpStatus status;
 }

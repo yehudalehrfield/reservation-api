@@ -1,6 +1,6 @@
  package com.yl.reservation.controller;
 
-import com.yl.reservation.exception.GraphQLException;
+import com.yl.reservation.exception.ResGraphException;
 import com.yl.reservation.service.HostService;
 import com.yl.reservation.service.HostUpdateResponse;
 import com.yl.reservation.service.HostSearchResponse;
@@ -25,7 +25,7 @@ public class HostController {
     @QueryMapping
     public Mono<HostSearchResponse> getAllHosts(@Argument boolean includeUserInfo){
         return hostService.getAllHosts(includeUserInfo)
-                .switchIfEmpty(Mono.error(new GraphQLException("No Hosts Found", HttpStatus.NOT_FOUND)))
+                .switchIfEmpty(Mono.error(new ResGraphException("No Hosts Found", HttpStatus.NOT_FOUND)))
                 .doOnNext(res -> logger.info(String.valueOf(res)))
                 .doFinally(res -> logger.info("Search for all hosts with response: {}",res))
                 .cache();
@@ -34,7 +34,7 @@ public class HostController {
     public Mono<HostSearchResponse> hostById(@Argument String hostId, @Argument boolean includeUserInfo){
         //todo: fix logging
         return hostService.getHostById(hostId, includeUserInfo)
-                .switchIfEmpty(Mono.error(new GraphQLException("Host not found with id: " + hostId, HttpStatus.NOT_FOUND)))
+                .switchIfEmpty(Mono.error(new ResGraphException("Host not found with id: " + hostId, HttpStatus.NOT_FOUND)))
                 .doOnNext(res -> logger.info(String.valueOf(res)))
                 .doFinally(res -> logger.info("Search for host with id: {}, response: {}", hostId, res))
                 .cache();
