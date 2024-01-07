@@ -8,7 +8,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface ReservationRepository extends ReactiveMongoRepository<Reservation, String> {
-    Mono<Reservation> findByReservationID(String reservationId);
+    Mono<Reservation> findByReservationId(String reservationId);
     Flux<Reservation> findByHostIdAndGuestId(String hostId, String guestId);
 
 }
