@@ -5,13 +5,21 @@ import com.yl.reservation.exception.ResException;
 import com.yl.reservation.model.ContactMethod;
 import com.yl.reservation.model.Host;
 import com.yl.reservation.model.User;
+import com.yl.reservation.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import reactor.core.publisher.Mono;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Service
 public class RequestValidatorService {
+
+    @Autowired
+    private static UserRepository userRepository;
 
     private static final Pattern phoneRegexPattern = Pattern.compile(
             "^[+]?(\\d{1,2})?[\\s.-]?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$");
@@ -19,6 +27,8 @@ public class RequestValidatorService {
             "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
     public static void validateCreateUserInfo(User user) {
+        if (StringUtils.hasText(user.getUserId()))
+            throw new ResException("Cannot create new user with a given userId", HttpStatus.BAD_REQUEST);
         if (!StringUtils.hasText(user.getLastName()))
             throw new ResException("Last name is blank or missing from the request", HttpStatus.BAD_REQUEST);
         if (!StringUtils.hasText(user.getFirstName()))

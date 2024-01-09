@@ -23,6 +23,16 @@ public class GraphExceptionResolver extends DataFetcherExceptionResolverAdapter 
                 gqlErrorBuilder.errorType(ErrorType.INTERNAL_ERROR);
             }
         }
+        if (ex instanceof  ResException resException){
+            gqlErrorBuilder.message(resException.getMessage());
+            if (resException.getStatus().equals(HttpStatus.NOT_FOUND)) {
+                gqlErrorBuilder.errorType(ErrorType.NOT_FOUND);
+            } else if (resException.getStatus().equals(HttpStatus.BAD_REQUEST)) {
+                gqlErrorBuilder.errorType(ErrorType.BAD_REQUEST);
+            } else {
+                gqlErrorBuilder.errorType(ErrorType.INTERNAL_ERROR);
+            }
+        }
         return gqlErrorBuilder.build();
     }
 }

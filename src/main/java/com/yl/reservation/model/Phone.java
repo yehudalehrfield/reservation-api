@@ -11,7 +11,7 @@ public class Phone {
     WORK,
     MOBILE
   }
-  private PhoneType type;
+  private PhoneType phoneType;
   private String value;
   private boolean isPrimary;
 

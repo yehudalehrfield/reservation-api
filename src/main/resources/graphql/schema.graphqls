@@ -12,7 +12,7 @@ type Mutation{
 }
 
 type Host {
-    id: ID
+    id: ID #remove
     hostId: String
     userId: String
     address: Address
@@ -26,7 +26,7 @@ type Host {
 }
 
 type User {
-    id: ID
+    id: ID #remove
     userId: String
     firstName: String
     lastName: String
@@ -39,7 +39,7 @@ type User {
 }
 
 input HostInput {
-    id: ID
+    id: ID #remove
     hostId: String
     userId: String
     address: AddressInput
@@ -51,7 +51,7 @@ input HostInput {
 }
 
 input UserInput{
-    id: ID
+    id: ID # remove
     userId: String
     lastName: String
     firstName: String
@@ -68,13 +68,13 @@ input HostUpdateRequest{
 }
 
 type Phone {
-    type: PhoneType
+    phoneType: PhoneType
     value: String
     isPrimary: Boolean
 }
 
 input PhoneInput {
-    type: PhoneType
+    phoneType: PhoneType
     value: String
     isPrimary: Boolean
 }
@@ -86,13 +86,13 @@ enum PhoneType {
 }
 
 type Email {
-    type: EmailType
+    emailType: EmailType
     value: String
     isPrimary: Boolean
 }
 
 input EmailInput {
-    type: EmailType
+    emailType: EmailType
     value: String
     isPrimary: Boolean
 }
@@ -131,7 +131,7 @@ type HostResponse{
 
 type HostSearchResponse{
     message: String
-    hostDetails: [HostDetails]
+    hostDetailsList: [HostDetails]
 }
 
 type HostDetails{
@@ -141,7 +141,7 @@ type HostDetails{
 
 type UserResponse{
     message: String
-    userList: User
+    userList: [User]
 }
 
 input CreateUpdateUserRequest{

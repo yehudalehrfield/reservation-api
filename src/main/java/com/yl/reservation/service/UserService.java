@@ -1,5 +1,6 @@
 package com.yl.reservation.service;
 
+import com.yl.reservation.exception.ResException;
 import com.yl.reservation.exception.ResGraphException;
 import com.yl.reservation.model.ContactMethod;
 import com.yl.reservation.model.Email;
@@ -37,11 +38,29 @@ public class UserService {
 
     public Mono<UserResponse> createNewUser(User requestUser, String createDateTime){
         RequestValidatorService.validateCreateUserInfo(requestUser);
-        User user = requestUser;
-        user.setUserId(ResUtil.generateId());
-        user.setCreatedDate(createDateTime);
-        user.setLastUpdated(createDateTime);
-        return userRepository.save(user).map(createdUser -> new UserResponse("Created user " + createdUser.getUserId(), List.of(createdUser)));
+        return validateNotExistingUser(requestUser)
+                .flatMap(res -> {
+                    if (res.equals(Boolean.TRUE))
+                        throw new ResException("User already exists", HttpStatus.BAD_REQUEST);
+                    else {
+                        requestUser.setUserId(ResUtil.generateId());
+                        requestUser.setCreatedDate(createDateTime);
+                        requestUser.setLastUpdated(createDateTime);
+                        return userRepository.save(requestUser).map(createdUser -> new UserResponse("Created user " + createdUser.getUserId(), List.of(createdUser)));
+                    }
+                });
+
+    }
+
+    private Mono<Boolean> validateNotExistingUser(User user) {
+        if (user.getPrimaryContactMethod().equals(ContactMethod.PHONE)){
+            return userRepository.findByLastNameAndPrimaryPhone(user.getLastName(),user.getPhone().stream().filter(Phone::isPrimary).toList().get(0).getValue())
+                    .map(res -> true)
+                    .switchIfEmpty(Mono.just(false));
+        }
+        return userRepository.findByLastNameAndPrimaryEmail(user.getLastName(),user.getEmail().stream().filter(Email::isPrimary).toList().get(0).getValue())
+                .map(res -> true)
+                .switchIfEmpty(Mono.just(false));
     }
 
     public Mono<UserResponse> updateUser(User requestUser, String updateDateTime) {

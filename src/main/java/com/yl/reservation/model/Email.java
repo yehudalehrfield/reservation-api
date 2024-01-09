@@ -10,7 +10,7 @@ public class Email {
     PERSONAL,
     WORK
   }
-  private EmailType type;
+  private EmailType emailType;
   private String value;
   private boolean isPrimary;
 }

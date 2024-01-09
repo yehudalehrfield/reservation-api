@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
+//todo: remove this class entirely?
 @Data
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor

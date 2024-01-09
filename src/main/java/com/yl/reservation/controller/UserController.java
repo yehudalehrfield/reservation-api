@@ -5,16 +5,23 @@ import com.yl.reservation.service.CreateUpdateUserRequest;
 import com.yl.reservation.service.UserResponse;
 import com.yl.reservation.service.UserService;
 import com.yl.reservation.util.ResUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;
 
+@Controller
 public class UserController {
 
     @Autowired
     UserService userService;
+
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @QueryMapping
     Mono<UserResponse> getAllUsers(){
@@ -30,16 +37,18 @@ public class UserController {
                 .cache();
     }
 
-    @QueryMapping
-    Mono<UserResponse> createUser(@Argument CreateUpdateUserRequest request){
+    @MutationMapping
+    Mono<UserResponse> createUser(@Argument CreateUpdateUserRequest createUpdateUserRequest){
         String createDateTime = ResUtil.getCurrentDateTimeString();
-        return userService.createNewUser(request.getUser(), createDateTime);
+        return userService.createNewUser(createUpdateUserRequest.getUser(), createDateTime)
+        .doOnNext(res -> logger.info(String.valueOf(res)))
+        .doFinally(res -> logger.info("Created User: {}",res));
     }
 
-    @QueryMapping
-    Mono<UserResponse> updateUser(@Argument CreateUpdateUserRequest request){
+    @MutationMapping
+    Mono<UserResponse> updateUser(@Argument CreateUpdateUserRequest createUpdateUserRequest){
         String updateDateTime = ResUtil.getCurrentDateTimeString();
-        return userService.updateUser(request.getUser(), updateDateTime);
+        return userService.updateUser(createUpdateUserRequest.getUser(), updateDateTime);
     }
 
 }
