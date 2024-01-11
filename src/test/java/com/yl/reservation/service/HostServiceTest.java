@@ -3,7 +3,6 @@ package com.yl.reservation.service;
 import com.yl.reservation.model.*;
 import com.yl.reservation.repository.HostRepository;
 import com.yl.reservation.repository.UserRepository;
-import com.yl.reservation.util.ResUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,7 +28,7 @@ public class HostServiceTest {
     UserRepository userRepository;
 
     @Mock
-    ResUtil resUtil;
+    CreateUpdateMapper createUpdateMapper;
 
 
     @Test

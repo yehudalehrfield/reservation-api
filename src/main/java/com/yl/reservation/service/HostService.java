@@ -119,7 +119,7 @@ public class HostService {
     private Mono<HostUpdateResponse> updateHostByHostId(HostUpdateRequest hostUpdateRequest, String createUpdateDateTime) {
         return hostRepository.findByHostId(hostUpdateRequest.getHost().getHostId())
                 .flatMap(hostToUpdate -> {
-                    Host updatedHost = ResUtil.updateHost(hostToUpdate, hostUpdateRequest.getHost(),
+                    Host updatedHost = CreateUpdateMapper.updateHost(hostToUpdate, hostUpdateRequest.getHost(),
                             hostUpdateRequest.getIsAddressUpdate(), createUpdateDateTime);
                     if (Boolean.TRUE.equals(hostUpdateRequest.getIsUserUpdate())) {
                         return zipUserUpdateWithHostUpdate(hostUpdateRequest, hostToUpdate, updatedHost, createUpdateDateTime);
@@ -135,7 +135,7 @@ public class HostService {
         return hostRepository.findByUserIdAndAddress(hostUpdateRequest.getHost().getUserId(),
                         hostUpdateRequest.getHost().getAddress())
                 .flatMap(hostToUpdate -> {
-                    Host updatedHost = ResUtil.updateHost(hostToUpdate, hostUpdateRequest.getHost(),
+                    Host updatedHost = CreateUpdateMapper.updateHost(hostToUpdate, hostUpdateRequest.getHost(),
                             hostUpdateRequest.getIsAddressUpdate(), createUpdateDateTime);
                     if (Boolean.TRUE.equals(hostUpdateRequest.getIsUserUpdate())) {
                         return zipUserUpdateWithHostUpdate(hostUpdateRequest, hostToUpdate, updatedHost, createUpdateDateTime);
@@ -158,7 +158,7 @@ public class HostService {
             String userIdToSearch = (userId != null) ? userId : hostUpdateRequest.getUser().getUserId();
             return userRepository.findByUserId(userIdToSearch)
                     .flatMap(user -> {
-                        User updatedUser = ResUtil.updateUser(user, hostUpdateRequest.getUser(), createUpdateDateTime);
+                        User updatedUser = CreateUpdateMapper.updateUser(user, hostUpdateRequest.getUser(), createUpdateDateTime);
                         return userRepository.save(updatedUser);
                     })
                     .onErrorResume(error -> Mono.error(new ResGraphException(error.getMessage(),
@@ -170,7 +170,7 @@ public class HostService {
             // find by lastName and primary contact if given in the request
             return fetchByPrimaryContactInfo(hostUpdateRequest)
                     .flatMap(user -> {
-                        User updatedUser = ResUtil.updateUser(user, hostUpdateRequest.getUser(), createUpdateDateTime);
+                        User updatedUser = CreateUpdateMapper.updateUser(user, hostUpdateRequest.getUser(), createUpdateDateTime);
                         return userRepository.save(updatedUser);
                     })
                     .onErrorResume(error -> Mono.error(new ResGraphException(error.getMessage(), HttpStatus.BAD_REQUEST)))

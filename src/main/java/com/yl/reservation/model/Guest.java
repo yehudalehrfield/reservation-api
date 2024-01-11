@@ -20,7 +20,7 @@ public class Guest {
     private String nickName;
     private int numAdults;
     private int numChildren;
-    private boolean crib;
+    private Boolean crib;
     private String notes;
     private String createdDate;
     private String lastUpdated;

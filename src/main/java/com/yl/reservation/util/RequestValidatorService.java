@@ -3,6 +3,7 @@ package com.yl.reservation.util;
 import com.yl.reservation.exception.ResGraphException;
 import com.yl.reservation.exception.ResException;
 import com.yl.reservation.model.ContactMethod;
+import com.yl.reservation.model.Guest;
 import com.yl.reservation.model.Host;
 import com.yl.reservation.model.User;
 import com.yl.reservation.repository.UserRepository;
@@ -43,6 +44,7 @@ public class RequestValidatorService {
         if (user.getEmail() != null) {
             user.getEmail().forEach(email -> validateEmail(email.getValue()));
         }
+        //todo: check this
         if (user.getPrimaryContactMethod() != null && user.getUserId() == null) {
             throw new ResException("Cannot update primary contact method without userId", HttpStatus.BAD_REQUEST);
         }
@@ -94,4 +96,18 @@ public class RequestValidatorService {
             throw new ResException("Invalid email address: " + email,HttpStatus.BAD_REQUEST);
         }
     }
+
+    public static void validateCreateGuestInfo(Guest requestGuest) {
+        if (requestGuest.getUserId() == null){
+            throw new ResGraphException("userId required for guest creation", HttpStatus.BAD_REQUEST);
+        }
+        if (requestGuest.getGuestId() != null){
+            throw new ResGraphException("Guest already exists", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public static void validateUpdateGuest(Guest guestToUpdate){
+
+    }
+
 }

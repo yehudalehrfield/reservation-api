@@ -2,10 +2,7 @@ package com.yl.reservation.service;
 
 import com.yl.reservation.exception.ResException;
 import com.yl.reservation.exception.ResGraphException;
-import com.yl.reservation.model.ContactMethod;
-import com.yl.reservation.model.Email;
-import com.yl.reservation.model.Phone;
-import com.yl.reservation.model.User;
+import com.yl.reservation.model.*;
 import com.yl.reservation.repository.UserRepository;
 import com.yl.reservation.util.RequestValidatorService;
 import com.yl.reservation.util.ResConstants;
@@ -64,25 +61,25 @@ public class UserService {
     }
 
     public Mono<UserResponse> updateUser(User requestUser, String updateDateTime) {
+        RequestValidatorService.validateUpdateUserInfo(requestUser);
         if (requestUser.getUserId() != null) {
             String userIdToSearch = requestUser.getUserId();
             return userRepository.findByUserId(userIdToSearch)
                     .flatMap(existingUser -> {
-                        User updatedUser = ResUtil.updateUser(existingUser, requestUser, updateDateTime);
+                        User updatedUser = CreateUpdateMapper.updateUser(existingUser, requestUser, updateDateTime);
                         return userRepository.save(updatedUser).map(user -> new UserResponse("Updated user " + user.getUserId(), List.of(user)));
                     })
                     .switchIfEmpty(Mono.error(new ResGraphException(ResConstants.USER_NOT_FOUND_WITH_ID + requestUser.getUserId(), HttpStatus.NOT_FOUND)));
         } else if (requestUser.getLastName() != null && requestUser.getPrimaryContactMethod() != null) {
             return fetchByPrimaryContactInfo(requestUser)
                     .flatMap(existingUser -> {
-                        User updatedUser = ResUtil.updateUser(existingUser, requestUser, updateDateTime);
+                        User updatedUser = CreateUpdateMapper.updateUser(existingUser, requestUser, updateDateTime);
                         return userRepository.save(updatedUser).map(user -> new UserResponse("Updated user " + user.getUserId(), List.of(user)));
                     })
                     .switchIfEmpty(Mono.error(new ResGraphException(ResConstants.USER_NOT_FOUND_WITH_ID + requestUser.getUserId(), HttpStatus.NOT_FOUND)));
         } else {
             throw new ResGraphException(ResConstants.USER_NO_IDENTIFYING_ERROR, HttpStatus.BAD_REQUEST);
         }
-
     }
 
     private Mono<User> fetchByPrimaryContactInfo(User user) {
@@ -98,4 +95,6 @@ public class UserService {
             );
         }
     }
+
+
 }
