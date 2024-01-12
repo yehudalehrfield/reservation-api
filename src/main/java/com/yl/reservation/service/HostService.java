@@ -23,31 +23,6 @@ public class HostService {
     @Autowired
     UserRepository userRepository;
 
-    public Mono<HostSearchResponse> getHostById(String hostId, boolean includeUserInfo) {
-        return hostRepository.findByHostId(hostId)
-                .flatMap(host -> {
-                    HostDetails hostDetails = new HostDetails();
-                    HostSearchResponse response = new HostSearchResponse();
-                    hostDetails.setHost(host);
-                    response.setHostDetailsList(List.of(hostDetails));
-
-                    // include user info if requested
-                    if (includeUserInfo) {
-                        return userRepository.findByUserId(host.getUserId())
-                                .flatMap(user -> {
-                                    hostDetails.setUser(user);
-                                    response.setMessage(ResConstants.HOST_FIND + host.getHostId() + " with user info...");
-                                    return Mono.just(response);
-                                })
-                                .switchIfEmpty(Mono.error(new ResGraphException(ResConstants.USER_NOT_FOUND_WITH_ID + host.getUserId() + "for host " + hostId, HttpStatus.NOT_FOUND)));
-                    }
-
-                    // if no user info is requested return response with no user info
-                    response.setMessage(ResConstants.HOST_FIND + host.getHostId());
-                    return Mono.just(response);
-                });
-    }
-
     public Mono<HostSearchResponse> getAllHosts(boolean includeUserInfo) {
         HostSearchResponse response = new HostSearchResponse();
         List<HostDetails> hostDetailsList = new ArrayList<>();
@@ -87,6 +62,31 @@ public class HostService {
 
     }
 
+    public Mono<HostSearchResponse> getHostById(String hostId, boolean includeUserInfo) {
+        return hostRepository.findByHostId(hostId)
+                .flatMap(host -> {
+                    HostDetails hostDetails = new HostDetails();
+                    HostSearchResponse response = new HostSearchResponse();
+                    hostDetails.setHost(host);
+                    response.setHostDetailsList(List.of(hostDetails));
+
+                    // include user info if requested
+                    if (includeUserInfo) {
+                        return userRepository.findByUserId(host.getUserId())
+                                .flatMap(user -> {
+                                    hostDetails.setUser(user);
+                                    response.setMessage(ResConstants.HOST_FIND + host.getHostId() + " with user info...");
+                                    return Mono.just(response);
+                                })
+                                .switchIfEmpty(Mono.error(new ResGraphException(ResConstants.USER_NOT_FOUND_WITH_ID + host.getUserId() + " for host " + hostId, HttpStatus.NOT_FOUND)));
+                    }
+                    // if no user info is requested return response with no user info
+                    response.setMessage(ResConstants.HOST_FIND + host.getHostId());
+                    return Mono.just(response);
+                });
+    }
+
+    //todo: break this into two api's - create and update (as with guest and user)
     public Mono<HostCreateUpdateResponse> createUpdateHost(HostCreateUpdateRequest hostCreateUpdateRequest) {
         String createUpdateDateTime = ResUtil.getCurrentDateTimeString();
         // check if host or user is in the request; throw an error if not.

@@ -1,6 +1,5 @@
 package com.yl.reservation.service;
 
-import com.yl.reservation.exception.ResException;
 import com.yl.reservation.exception.ResGraphException;
 import com.yl.reservation.model.*;
 import com.yl.reservation.repository.GuestRepository;
@@ -82,7 +81,6 @@ public class GuestService {
                                 })
                                 .switchIfEmpty(Mono.error(new ResGraphException(ResConstants.USER_NOT_FOUND_WITH_ID + guest.getUserId() + "for guest " + guestId, HttpStatus.NOT_FOUND)));
                     }
-
                     // if no user info is requested return response with no user info
                     response.setMessage(ResConstants.GUEST_FIND + guest.getGuestId());
                     return Mono.just(response);
@@ -94,7 +92,7 @@ public class GuestService {
         return validateNotExistingGuest(requestGuest)
                 .flatMap(res -> {
                     if (res.equals(Boolean.TRUE))
-                        throw new ResException("Guest already exists", HttpStatus.BAD_REQUEST);
+                        throw new ResGraphException("Guest already exists", HttpStatus.BAD_REQUEST);
                     else {
                         requestGuest.setGuestId(ResUtil.generateId());
                         requestGuest.setCreatedDate(createDateTime);
@@ -112,8 +110,7 @@ public class GuestService {
     }
 
     public Mono<GuestCreateUpdateResponse> updateGuest(Guest requestGuest, String updateDateTime) {
-        //todo:
-        //        RequestValidatorService.validateUpdateGuestInfo(requestGuest);
+        //todo: validation?
         if (requestGuest.getGuestId() != null) {
             String guestIdToSearch = requestGuest.getUserId();
             return guestRepository.findByGuestId(guestIdToSearch)

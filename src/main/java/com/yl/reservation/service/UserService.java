@@ -54,10 +54,11 @@ public class UserService {
             return userRepository.findByLastNameAndPrimaryPhone(user.getLastName(),user.getPhone().stream().filter(Phone::isPrimary).toList().get(0).getValue())
                     .map(res -> true)
                     .switchIfEmpty(Mono.just(false));
+        } else {
+            return userRepository.findByLastNameAndPrimaryEmail(user.getLastName(),user.getEmail().stream().filter(Email::isPrimary).toList().get(0).getValue())
+                    .map(res -> true)
+                    .switchIfEmpty(Mono.just(false));
         }
-        return userRepository.findByLastNameAndPrimaryEmail(user.getLastName(),user.getEmail().stream().filter(Email::isPrimary).toList().get(0).getValue())
-                .map(res -> true)
-                .switchIfEmpty(Mono.just(false));
     }
 
     public Mono<UserResponse> updateUser(User requestUser, String updateDateTime) {
@@ -95,6 +96,5 @@ public class UserService {
             );
         }
     }
-
 
 }
