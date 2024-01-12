@@ -5,12 +5,11 @@ import com.yl.reservation.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class HostUpdateRequest {
+public class HostCreateUpdateRequest {
     private Host host;
     private User user;
     //todo: can i use a primitive here? alternatively, remove this field here and just use a gql field.

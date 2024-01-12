@@ -6,9 +6,9 @@ type Query {
 }
 
 type Mutation{
-    createUpdateHost(hostUpdateRequest: HostUpdateRequest): HostResponse
-    createUser(createUpdateUserRequest: CreateUpdateUserRequest): UserResponse
-    updateUser(createUpdateUserRequest: CreateUpdateUserRequest): UserResponse
+    createUpdateHost(hostCreateUpdateRequest: HostUpdateRequest): HostResponse
+    createUser(userCreateUpdateRequest: CreateUpdateUserRequest): UserResponse
+    updateUser(userCreateUpdateRequest: CreateUpdateUserRequest): UserResponse
 }
 
 type Host {

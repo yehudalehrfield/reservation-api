@@ -1,6 +1,6 @@
 package com.yl.reservation.service;
 
-import com.yl.reservation.model.User;
+import com.yl.reservation.model.Guest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateUpdateUserRequest {
-    private User user;
+public class GuestCreateUpdateResponse {
+    String message;
+    Guest guest;
 }

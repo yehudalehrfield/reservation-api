@@ -11,5 +11,5 @@ import java.util.List;
 @NoArgsConstructor
 public class GuestSearchResponse {
     private String message;
-    private List<GuestDetails> guestDetails;
+    private List<GuestDetails> guestDetailsList;
 }

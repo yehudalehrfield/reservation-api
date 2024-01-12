@@ -43,7 +43,7 @@ public class GuestService {
                             }))
                     .collectList()
                     .map(hostList -> {
-                        response.setGuestDetails(hostList);
+                        response.setGuestDetailsList(hostList);
                         response.setMessage(ResConstants.GUEST_FIND_ALL_USER_INFO);
                         return response;
                     });
@@ -56,7 +56,7 @@ public class GuestService {
                             guestDetails.setGuest(guest);
                             guestDetailsList.add(guestDetails);
                         });
-                        response.setGuestDetails(guestDetailsList);
+                        response.setGuestDetailsList(guestDetailsList);
                         response.setMessage(ResConstants.GUEST_FIND_ALL_NO_USER_INFO);
                         return Mono.just(response);
                     });
@@ -70,7 +70,7 @@ public class GuestService {
                     GuestDetails guestDetails = new GuestDetails();
                     GuestSearchResponse response = new GuestSearchResponse();
                     guestDetails.setGuest(guest);
-                    response.setGuestDetails(List.of(guestDetails));
+                    response.setGuestDetailsList(List.of(guestDetails));
 
                     // include user info if requested
                     if (includeUserInfo) {
@@ -89,7 +89,7 @@ public class GuestService {
                 });
     }
 
-    public Mono<GuestResponse> createNewGuest(Guest requestGuest, String createDateTime){
+    public Mono<GuestCreateUpdateResponse> createNewGuest(Guest requestGuest, String createDateTime){
         RequestValidatorService.validateCreateGuestInfo(requestGuest);
         return validateNotExistingGuest(requestGuest)
                 .flatMap(res -> {
@@ -99,7 +99,7 @@ public class GuestService {
                         requestGuest.setGuestId(ResUtil.generateId());
                         requestGuest.setCreatedDate(createDateTime);
                         requestGuest.setLastUpdated(createDateTime);
-                        return guestRepository.save(requestGuest).map(createdGuest -> new GuestResponse(ResConstants.GUEST_CREATE + createdGuest.getGuestId(), List.of(createdGuest)));
+                        return guestRepository.save(requestGuest).map(createdGuest -> new GuestCreateUpdateResponse(ResConstants.GUEST_CREATE + createdGuest.getGuestId(), createdGuest));
                     }
                 });
 
@@ -111,7 +111,7 @@ public class GuestService {
                 .switchIfEmpty(Mono.just(false));
     }
 
-    public Mono<GuestResponse> updateGuest(Guest requestGuest, String updateDateTime) {
+    public Mono<GuestCreateUpdateResponse> updateGuest(Guest requestGuest, String updateDateTime) {
         //todo:
         //        RequestValidatorService.validateUpdateGuestInfo(requestGuest);
         if (requestGuest.getGuestId() != null) {
@@ -119,14 +119,14 @@ public class GuestService {
             return guestRepository.findByGuestId(guestIdToSearch)
                     .flatMap(existingGuest -> {
                         Guest updatedGuest = CreateUpdateMapper.updateGuest(existingGuest, requestGuest, updateDateTime);
-                        return guestRepository.save(updatedGuest).map(guest -> new GuestResponse(ResConstants.GUEST_UPDATE + guest.getGuestId(), List.of(guest)));
+                        return guestRepository.save(updatedGuest).map(guest -> new GuestCreateUpdateResponse(ResConstants.GUEST_UPDATE + guest.getGuestId(), guest));
                     })
                     .switchIfEmpty(Mono.error(new ResGraphException(ResConstants.GUEST_NOT_FOUND_WITH_ID + requestGuest.getGuestId(), HttpStatus.NOT_FOUND)));
         } else if (requestGuest.getUserId() != null && requestGuest.getNickName() != null) {
             return guestRepository.findByUserIdAndNickName(requestGuest.getUserId(),requestGuest.getNickName())
                     .flatMap(existingGuest -> {
                         Guest updatedGuest = CreateUpdateMapper.updateGuest(existingGuest, requestGuest, updateDateTime);
-                        return guestRepository.save(updatedGuest).map(guest -> new GuestResponse(ResConstants.GUEST_UPDATE + guest.getGuestId(), List.of(guest)));
+                        return guestRepository.save(updatedGuest).map(guest -> new GuestCreateUpdateResponse(ResConstants.GUEST_UPDATE + guest.getGuestId(), guest));
                     })
                     .switchIfEmpty(Mono.error(new ResGraphException(ResConstants.GUEST_NOT_FOUND_WITH_ID + requestGuest.getGuestId(), HttpStatus.NOT_FOUND)));
         } else {

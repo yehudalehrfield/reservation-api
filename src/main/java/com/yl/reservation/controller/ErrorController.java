@@ -1,7 +1,7 @@
 package com.yl.reservation.controller;
 
 import com.yl.reservation.exception.ResException;
-import com.yl.reservation.service.HostUpdateResponse;
+import com.yl.reservation.service.HostCreateUpdateResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +22,8 @@ public class ErrorController {
     }
 
     @ExceptionHandler(ResException.class)
-    public ResponseEntity<HostUpdateResponse> handleHostException(ResException exception){
-        HostUpdateResponse response = new HostUpdateResponse();
+    public ResponseEntity<HostCreateUpdateResponse> handleHostException(ResException exception){
+        HostCreateUpdateResponse response = new HostCreateUpdateResponse();
         response.setMessage(exception.getMessage());
         return new ResponseEntity<>(response,exception.getStatus());
     }

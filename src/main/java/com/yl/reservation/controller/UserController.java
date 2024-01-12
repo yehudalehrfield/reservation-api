@@ -1,10 +1,9 @@
 package com.yl.reservation.controller;
 
 import com.yl.reservation.exception.ResGraphException;
-import com.yl.reservation.service.CreateUpdateUserRequest;
+import com.yl.reservation.service.UserCreateUpdateRequest;
 import com.yl.reservation.service.UserResponse;
 import com.yl.reservation.service.UserService;
-import com.yl.reservation.service.CreateUpdateMapper;
 import com.yl.reservation.util.ResUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +27,11 @@ public class UserController {
     Mono<UserResponse> getAllUsers(){
         return userService.getAllUsers()
                 .switchIfEmpty(Mono.error(new ResGraphException("No Users Found", HttpStatus.NOT_FOUND)))
+                .doOnSuccess(res -> logger.info("Fetched all users: {}", res.getUserList()))
+                .onErrorResume(error -> {
+                    logger.error("Error fetching all users");
+                    return Mono.error(error);
+                })
                 .cache();
     }
 
@@ -35,21 +39,36 @@ public class UserController {
     Mono<UserResponse> getUserById(@Argument String userId){
         return userService.getUserById(userId)
                 .switchIfEmpty(Mono.error(new ResGraphException("User " + userId + " not found", HttpStatus.NOT_FOUND)))
+                .doOnSuccess(res -> logger.info("Fetched user: {}", res.getUserList()))
+                .onErrorResume(error -> {
+                    logger.error("Error fetching all user {}", userId);
+                    return Mono.error(error);
+                })
                 .cache();
     }
 
     @MutationMapping
-    Mono<UserResponse> createUser(@Argument CreateUpdateUserRequest createUpdateUserRequest){
+    Mono<UserResponse> createUser(@Argument UserCreateUpdateRequest userCreateUpdateRequest){
         String createDateTime = ResUtil.getCurrentDateTimeString();
-        return userService.createNewUser(createUpdateUserRequest.getUser(), createDateTime)
-        .doOnNext(res -> logger.info(String.valueOf(res)))
-        .doFinally(res -> logger.info("Created User: {}",res));
+        return userService.createNewUser(userCreateUpdateRequest.getUser(), createDateTime)
+                .doOnSuccess(res -> logger.info("Created user: {}", res.getUserList().get(0).getUserId()))
+                .onErrorResume(error -> {
+                    logger.error("Error creating user {}", userCreateUpdateRequest.getUser());
+                    return Mono.error(error);
+                })
+                .cache();
     }
 
     @MutationMapping
-    Mono<UserResponse> updateUser(@Argument CreateUpdateUserRequest createUpdateUserRequest){
+    Mono<UserResponse> updateUser(@Argument UserCreateUpdateRequest userCreateUpdateRequest){
         String updateDateTime = ResUtil.getCurrentDateTimeString();
-        return userService.updateUser(createUpdateUserRequest.getUser(), updateDateTime);
+        return userService.updateUser(userCreateUpdateRequest.getUser(), updateDateTime)
+                .doOnSuccess(res -> logger.info("Updated user: {}", res.getUserList().get(0).getUserId()))
+                .onErrorResume(error -> {
+                    logger.error("Error updating user {}", userCreateUpdateRequest.getUser());
+                    return Mono.error(error);
+                })
+                .cache();
     }
 
 }

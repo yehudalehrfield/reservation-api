@@ -84,16 +84,19 @@ public class HostControllerTest {
                 .verifyComplete();
     }
 
+
     @Test
     void createUpdateHost(){
         Host host = new Host();
         host.setHostId("hostId");
         host.setUserId("userId");
+        host.setCreatedDate("today");
+        host.setLastUpdated("today");
         User user = new User();
         user.setUserId("userId");
-        HostUpdateRequest request = new HostUpdateRequest(host,user,Boolean.FALSE, Boolean.FALSE);
+        HostCreateUpdateRequest request = new HostCreateUpdateRequest(host,user,Boolean.FALSE, Boolean.FALSE);
 
-        HostUpdateResponse response = new HostUpdateResponse("success", host, user);
+        HostCreateUpdateResponse response = new HostCreateUpdateResponse("success", host, user);
 
         Mockito.when(hostService.createUpdateHost(request)).thenReturn(Mono.just(response));
 
