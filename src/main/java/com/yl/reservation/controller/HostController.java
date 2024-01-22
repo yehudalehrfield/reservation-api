@@ -5,17 +5,16 @@ import com.yl.reservation.service.HostService;
 import com.yl.reservation.service.HostCreateUpdateResponse;
 import com.yl.reservation.service.HostSearchResponse;
 import com.yl.reservation.service.HostCreateUpdateRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.yl.reservation.util.ResLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
- //todo: fix logging
 
  @RestController
 public class HostController {
@@ -23,25 +22,26 @@ public class HostController {
     @Autowired
     HostService hostService;
 
-    private static final Logger logger = LoggerFactory.getLogger(HostController.class);
     @QueryMapping
     public Mono<HostSearchResponse> getAllHosts(@Argument boolean includeUserInfo){
+        ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "getAllHosts");
         return hostService.getAllHosts(includeUserInfo)
-                .switchIfEmpty(Mono.error(new ResGraphException("No Hosts Found", HttpStatus.NOT_FOUND)))
-                .doOnSuccess(res -> logger.info("Fetched all hosts: {}", res.getHostDetailsList()))
+                .switchIfEmpty(returnNotFound(resLogger, "No hosts found"))
+                .doOnSuccess(res -> resLogger.setValuesToLogger(HttpStatus.OK, res.toString()))
                 .onErrorResume(error -> {
-                    logger.error("Error fetching all hosts");
+                    resLogger.setValuesToLogger(HttpStatus.INTERNAL_SERVER_ERROR, error.getMessage());
                     return Mono.error(error);
                 })
                 .cache();
     }
     @QueryMapping
     public Mono<HostSearchResponse> getHostById(@Argument String hostId, @Argument boolean includeUserInfo){
+        ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "getHostById");
         return hostService.getHostById(hostId, includeUserInfo)
-                .switchIfEmpty(Mono.error(new ResGraphException("Host not found with id: " + hostId, HttpStatus.NOT_FOUND)))
-                .doOnSuccess(res -> logger.info("Fetched host: {}", res.getHostDetailsList()))
+                .switchIfEmpty(returnNotFound(resLogger, "Host not found with id: " + hostId))
+                .doOnSuccess(res -> resLogger.setValuesToLogger(HttpStatus.OK, res.toString()))
                 .onErrorResume(error -> {
-                    logger.error("Error fetching host {}", hostId);
+                    resLogger.setValuesToLogger(HttpStatus.INTERNAL_SERVER_ERROR, error.getMessage());
                     return Mono.error(error);
                 })
                 .cache();
@@ -49,18 +49,20 @@ public class HostController {
 
     @MutationMapping
     public Mono<HostCreateUpdateResponse> createUpdateHost(@Argument HostCreateUpdateRequest hostCreateUpdateRequest){
+        ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "createUpdateHost");
         return hostService.createUpdateHost(hostCreateUpdateRequest)
-                .doOnSuccess(res -> logger.info(
-                        "Successful {} of host {}",
-                        (res.getHost().getCreatedDate().equals(res.getHost().getLastUpdated())) ? "creation" : "update",
-                        res.getHost().getHostId())
-                )
+                .doOnSuccess(res -> resLogger.setValuesToLogger(HttpStatus.OK, res.toString()))
                 .onErrorResume(error -> {
-                    logger.error("Error in create/update host {}", hostCreateUpdateRequest.getHost());
+                    resLogger.setValuesToLogger(HttpStatus.INTERNAL_SERVER_ERROR, error.getMessage());
                     return Mono.error(error);
                 })
                 .cache();
     }
+
+     private static Mono<HostSearchResponse> returnNotFound(ResLogger resLogger, String message){
+         resLogger.setValuesToLogger(HttpStatus.NOT_FOUND, null);
+         return Mono.error(new ResGraphException(message, HttpStatus.NOT_FOUND));
+     }
 
 
 

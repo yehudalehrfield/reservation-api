@@ -5,12 +5,12 @@ import com.yl.reservation.service.UserCreateUpdateRequest;
 import com.yl.reservation.service.UserResponse;
 import com.yl.reservation.service.UserService;
 import com.yl.reservation.util.ResUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.yl.reservation.util.ResLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;
@@ -21,54 +21,71 @@ public class UserController {
     @Autowired
     UserService userService;
 
-    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
-
     @QueryMapping
-    Mono<UserResponse> getAllUsers(){
+    Mono<UserResponse> getAllUsers() {
+        ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "getAllUsers");
+//        ServletRequestAttributes servletRequestAttributes =
+//                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+//        HttpServletRequest request = null;
+//        if (servletRequestAttributes != null) {
+//            request = servletRequestAttributes.getRequest();
+//        }
+        resLogger.setStartTime(System.currentTimeMillis());
+        resLogger.setRequestMethod(HttpMethod.POST);
+//        if (request != null)
+//            resLogger.getHeaders(request);
+        resLogger.setQuery("getAllUsers");
         return userService.getAllUsers()
-                .switchIfEmpty(Mono.error(new ResGraphException("No Users Found", HttpStatus.NOT_FOUND)))
-                .doOnSuccess(res -> logger.info("Fetched all users: {}", res.getUserList()))
+                .switchIfEmpty(returnNotFound(resLogger, "No users found"))
+                .doOnSuccess(res -> resLogger.setValuesToLogger(HttpStatus.OK, res.toString()))
                 .onErrorResume(error -> {
-                    logger.error("Error fetching all users");
+                    resLogger.setValuesToLogger(HttpStatus.INTERNAL_SERVER_ERROR, error.getMessage());
                     return Mono.error(error);
                 })
                 .cache();
     }
 
     @QueryMapping
-    Mono<UserResponse> getUserById(@Argument String userId){
+    Mono<UserResponse> getUserById(@Argument String userId) {
+        ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "getUserById");
         return userService.getUserById(userId)
-                .switchIfEmpty(Mono.error(new ResGraphException("User " + userId + " not found", HttpStatus.NOT_FOUND)))
-                .doOnSuccess(res -> logger.info("Fetched user: {}", res.getUserList()))
+                .switchIfEmpty(returnNotFound(resLogger, "User " + userId + " not found"))
+                .doOnSuccess(res -> resLogger.setValuesToLogger(HttpStatus.OK, res.toString()))
                 .onErrorResume(error -> {
-                    logger.error("Error fetching all user {}", userId);
+                    resLogger.setValuesToLogger(HttpStatus.INTERNAL_SERVER_ERROR, error.getMessage());
                     return Mono.error(error);
                 })
                 .cache();
     }
 
     @MutationMapping
-    Mono<UserResponse> createUser(@Argument UserCreateUpdateRequest userCreateUpdateRequest){
+    Mono<UserResponse> createUser(@Argument UserCreateUpdateRequest userCreateUpdateRequest) {
+        ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "createUser");
         String createDateTime = ResUtil.getCurrentDateTimeString();
         return userService.createNewUser(userCreateUpdateRequest.getUser(), createDateTime)
-                .doOnSuccess(res -> logger.info("Created user: {}", res.getUserList().get(0).getUserId()))
+                .doOnSuccess(res -> resLogger.setValuesToLogger(HttpStatus.OK, res.toString()))
                 .onErrorResume(error -> {
-                    logger.error("Error creating user {}", userCreateUpdateRequest.getUser());
+                    resLogger.setValuesToLogger(HttpStatus.INTERNAL_SERVER_ERROR, error.getMessage());
                     return Mono.error(error);
                 })
                 .cache();
     }
 
     @MutationMapping
-    Mono<UserResponse> updateUser(@Argument UserCreateUpdateRequest userCreateUpdateRequest){
+    Mono<UserResponse> updateUser(@Argument UserCreateUpdateRequest userCreateUpdateRequest) {
+        ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "updateUser");
         String updateDateTime = ResUtil.getCurrentDateTimeString();
         return userService.updateUser(userCreateUpdateRequest.getUser(), updateDateTime)
-                .doOnSuccess(res -> logger.info("Updated user: {}", res.getUserList().get(0).getUserId()))
+                .doOnSuccess(res -> resLogger.setValuesToLogger(HttpStatus.OK, res.toString()))
                 .onErrorResume(error -> {
-                    logger.error("Error updating user {}", userCreateUpdateRequest.getUser());
+                    resLogger.setValuesToLogger(HttpStatus.INTERNAL_SERVER_ERROR, error.getMessage());
                     return Mono.error(error);
                 })
                 .cache();
     }
 
+    private static Mono<UserResponse> returnNotFound(ResLogger resLogger, String message){
+        resLogger.setValuesToLogger(HttpStatus.NOT_FOUND, null);
+        return Mono.error(new ResGraphException(message, HttpStatus.NOT_FOUND));
+    }
 }
