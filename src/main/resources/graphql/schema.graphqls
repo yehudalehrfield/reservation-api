@@ -1,14 +1,31 @@
 type Query {
-    getHostById(hostId: String!, includeUserInfo: Boolean = false): HostSearchResponse
-    getAllHosts(includeUserInfo: Boolean = false): HostSearchResponse
     getUserById(userId: String!): UserResponse
     getAllUsers: UserResponse
+    getHostById(hostId: String!, includeUserInfo: Boolean = false): HostSearchResponse
+    getAllHosts(includeUserInfo: Boolean = false): HostSearchResponse
+    getGuestById(guestId: String!, includeUserInfo: Boolean = false): GuestSearchResponse
+    getAllGuests(includeUserInfo: Boolean = false): GuestSearchResponse
 }
 
 type Mutation{
-    createUpdateHost(hostCreateUpdateRequest: HostUpdateRequest): HostResponse
-    createUser(userCreateUpdateRequest: CreateUpdateUserRequest): UserResponse
-    updateUser(userCreateUpdateRequest: CreateUpdateUserRequest): UserResponse
+    createUpdateHost(hostCreateUpdateRequest: HostCreateUpdateRequest): HostResponse
+    createUser(userCreateUpdateRequest: UserCreateUpdateRequest): UserResponse
+    updateUser(userCreateUpdateRequest: UserCreateUpdateRequest): UserResponse
+    createGuest(guestCreateUpdateRequest: GuestCreateUpdateRequest): GuestResponse
+    updateGuest(guestCreateUpdateRequest: GuestCreateUpdateRequest): GuestResponse
+}
+
+type User {
+    id: ID #remove
+    userId: String
+    firstName: String
+    lastName: String
+    phone: [Phone]
+    email: [Email]
+    primaryContactMethod: ContactMethod
+    createdDate: String
+    lastUpdated: String
+
 }
 
 type Host {
@@ -25,17 +42,78 @@ type Host {
     lastUpdated: String
 }
 
-type User {
+type Guest{
     id: ID #remove
+    guestId: String
     userId: String
-    firstName: String
-    lastName: String
-    phone: [Phone]
-    email: [Email]
-    primaryContactMethod: ContactMethod
+    nickName: String
+    numAdults: Int
+    numChildren: Int
+    crib: Boolean
+    notes: String
     createdDate: String
     lastUpdated: String
+}
 
+type UserResponse{
+    message: String
+    userList: [User]
+}
+
+type HostResponse{
+    message: String
+    host: Host
+    user: User
+}
+
+type GuestResponse{
+    message: String
+    guest: Guest
+}
+
+type HostSearchResponse{
+    message: String
+    hostDetailsList: [HostDetails]
+}
+
+type HostDetails{
+    host: Host
+    user: User
+}
+
+type GuestSearchResponse{
+    message: String
+    guestDetailsList: [GuestDetails]
+}
+
+type GuestDetails{
+    guest: Guest
+    user: User
+}
+
+input UserCreateUpdateRequest{
+    user: UserInput
+}
+
+input HostCreateUpdateRequest{
+    isAddressUpdate: Boolean = false
+    isUserUpdate: Boolean = false
+    host: HostInput
+    user: UserInput
+}
+
+input GuestCreateUpdateRequest{
+    guest: GuestInput
+}
+
+input UserInput{
+    id: ID # remove
+    userId: String
+    lastName: String
+    firstName: String
+    phone: [PhoneInput]
+    email: [EmailInput]
+    primaryContactMethod: ContactMethod
 }
 
 input HostInput {
@@ -50,21 +128,15 @@ input HostInput {
     notes: String
 }
 
-input UserInput{
+input GuestInput{
     id: ID # remove
+    guestId: String
     userId: String
-    lastName: String
-    firstName: String
-    phone: [PhoneInput]
-    email: [EmailInput]
-    primaryContactMethod: ContactMethod
-}
-
-input HostUpdateRequest{
-    isAddressUpdate: Boolean = false
-    isUserUpdate: Boolean = false
-    host: HostInput
-    user: UserInput
+    nickName: String
+    numAdults: Int
+    numChildrean: Int
+    crib: Boolean
+    notes: String
 }
 
 type Phone {
@@ -123,27 +195,5 @@ enum ContactMethod {
     EMAIL
 }
 
-type HostResponse{
-    message: String
-    host: Host
-    user: User
-}
 
-type HostSearchResponse{
-    message: String
-    hostDetailsList: [HostDetails]
-}
 
-type HostDetails{
-    host: Host
-    user: User
-}
-
-type UserResponse{
-    message: String
-    userList: [User]
-}
-
-input CreateUpdateUserRequest{
-    user: UserInput
-}

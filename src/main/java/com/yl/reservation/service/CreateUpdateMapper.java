@@ -2,21 +2,15 @@ package com.yl.reservation.service;
 
 import com.yl.reservation.exception.ResGraphException;
 import com.yl.reservation.exception.ResException;
-import com.yl.reservation.model.ContactMethod;
+
 import com.yl.reservation.model.Guest;
 import com.yl.reservation.model.Host;
 import com.yl.reservation.model.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+import org.springframework.http.HttpStatus;
+
 
 public class CreateUpdateMapper {
-
-    private static final Logger logger = LoggerFactory.getLogger(CreateUpdateMapper.class);
 
 //    ╔══════════╗
 //    ║   USER   ║
@@ -54,9 +48,8 @@ public class CreateUpdateMapper {
         if (!isGuestUpdate(guestToUpdate, guestFromRequest)) {
             //todo: don't throw exception here. will be a problem when we update host and user...
             throw new ResException("No updates to apply", HttpStatus.OK);
-//            logger.info("No host updates to apply.");
-//            return null;
         } else {
+            //todo: use optionals/streams here
             if (guestFromRequest.getNickName() != null) guestToUpdate.setNickName(guestFromRequest.getNickName());
             if (guestFromRequest.getNumAdults() > 0) guestToUpdate.setNumAdults(guestFromRequest.getNumAdults());
             if (guestFromRequest.getNumChildren() > 0) guestToUpdate.setNumAdults(guestFromRequest.getNumChildren());
@@ -70,13 +63,15 @@ public class CreateUpdateMapper {
     }
 
     public static boolean isGuestUpdate(Guest updatedGuest, Guest requestGuest) {
+        //todo: use optionals/streams here
         if (!requestGuest.getNickName().equals(updatedGuest.getNickName()))
             return true;
         if (requestGuest.getNumAdults() != updatedGuest.getNumAdults())
             return true;
         if (requestGuest.getNumChildren() != updatedGuest.getNumChildren())
             return true;
-        if (requestGuest.getCrib().equals(updatedGuest.getCrib()))
+//        ofNullable(requestGuest.getCrib()).ifPresentOrElse(requestCrib -> isCribUpdate = requestCrib.equals(updatedGuest.getCrib(), () -> isCribUpdate = false));
+        if (requestGuest.getCrib() != null && !requestGuest.getCrib().equals(updatedGuest.getCrib()))
             return true;
         return !requestGuest.getNotes().equals(updatedGuest.getNotes());
     }
@@ -90,8 +85,6 @@ public class CreateUpdateMapper {
         if (!isHostUpdate(hostToUpdate, hostFromRequest, isAddressUpdate)) {
             //todo: don't throw exception here. will be a problem when we update host and user...
             throw new ResException("No updates to apply", HttpStatus.OK);
-//            logger.info("No host updates to apply.");
-//            return null;
         } else {
             if (hostFromRequest.getAddress() != null) hostToUpdate.setAddress(hostFromRequest.getAddress());
             if (hostFromRequest.getBeds() > 0) hostToUpdate.setBeds(hostFromRequest.getBeds());

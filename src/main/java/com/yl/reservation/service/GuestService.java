@@ -87,20 +87,21 @@ public class GuestService {
                 });
     }
 
-    public Mono<GuestCreateUpdateResponse> createNewGuest(Guest requestGuest, String createDateTime){
+    public Mono<GuestCreateUpdateResponse> createNewGuest(Guest requestGuest, String createDateTime) {
         RequestValidatorService.validateCreateGuestInfo(requestGuest);
-        return validateNotExistingGuest(requestGuest)
-                .flatMap(res -> {
-                    if (res.equals(Boolean.TRUE))
-                        throw new ResGraphException("Guest already exists", HttpStatus.BAD_REQUEST);
-                    else {
-                        requestGuest.setGuestId(ResUtil.generateId());
-                        requestGuest.setCreatedDate(createDateTime);
-                        requestGuest.setLastUpdated(createDateTime);
-                        return guestRepository.save(requestGuest).map(createdGuest -> new GuestCreateUpdateResponse(ResConstants.GUEST_CREATE + createdGuest.getGuestId(), createdGuest));
-                    }
-                });
-
+        return userRepository.findByUserId(requestGuest.getUserId())
+                .switchIfEmpty(Mono.error(new ResGraphException("No user with id " + requestGuest.getUserId(), HttpStatus.BAD_REQUEST)))
+                .flatMap(user -> validateNotExistingGuest(requestGuest)
+                        .flatMap(res -> {
+                            if (res.equals(Boolean.TRUE))
+                                throw new ResGraphException("Guest already exists", HttpStatus.BAD_REQUEST);
+                            else {
+                                requestGuest.setGuestId(ResUtil.generateId());
+                                requestGuest.setCreatedDate(createDateTime);
+                                requestGuest.setLastUpdated(createDateTime);
+                                return guestRepository.save(requestGuest).map(createdGuest -> new GuestCreateUpdateResponse(ResConstants.GUEST_CREATE + createdGuest.getGuestId(), createdGuest));
+                            }
+                        }));
     }
 
     private Mono<Boolean> validateNotExistingGuest(Guest guest) {
@@ -112,7 +113,7 @@ public class GuestService {
     public Mono<GuestCreateUpdateResponse> updateGuest(Guest requestGuest, String updateDateTime) {
         //todo: validation?
         if (requestGuest.getGuestId() != null) {
-            String guestIdToSearch = requestGuest.getUserId();
+            String guestIdToSearch = requestGuest.getGuestId();
             return guestRepository.findByGuestId(guestIdToSearch)
                     .flatMap(existingGuest -> {
                         Guest updatedGuest = CreateUpdateMapper.updateGuest(existingGuest, requestGuest, updateDateTime);
