@@ -30,9 +30,8 @@ public class HostServiceTest {
     @Mock
     CreateUpdateMapper createUpdateMapper;
 
-
     @Test
-    void getHostById(){
+    void getHostById() {
         Host host1 = new Host();
         host1.setHostId("hostId1");
         host1.setUserId("userId1");
@@ -40,26 +39,28 @@ public class HostServiceTest {
         User user1 = new User();
         user1.setUserId("userId1");
 
-        HostDetails hostDetailsWithUserInfo = new HostDetails(host1,user1);
-        HostDetails hostDetailsNoUserInfo = new HostDetails(host1,null);
+        HostDetails hostDetailsWithUserInfo = new HostDetails(host1, user1);
+        HostDetails hostDetailsNoUserInfo = new HostDetails(host1, null);
 
-        HostSearchResponse responseWithUserInfo = new HostSearchResponse("Retrieved host hostId1 with user info...", List.of(hostDetailsWithUserInfo));
-        HostSearchResponse responseNoUserInfo = new HostSearchResponse("Retrieved host hostId1", List.of(hostDetailsNoUserInfo));
+        HostSearchResponse responseWithUserInfo = new HostSearchResponse("Retrieved host hostId1 with user info...",
+                List.of(hostDetailsWithUserInfo));
+        HostSearchResponse responseNoUserInfo = new HostSearchResponse("Retrieved host hostId1",
+                List.of(hostDetailsNoUserInfo));
 
         Mockito.when(hostRepository.findByHostId(Mockito.anyString())).thenReturn(Mono.just(host1));
         Mockito.when(userRepository.findByUserId(Mockito.anyString())).thenReturn(Mono.just(user1));
 
-        StepVerifier.create(hostService.getHostById("host1",true))
+        StepVerifier.create(hostService.getHostById("host1", true))
                 .expectNext(responseWithUserInfo)
                 .verifyComplete();
 
-        StepVerifier.create(hostService.getHostById("host1",false))
+        StepVerifier.create(hostService.getHostById("host1", false))
                 .expectNext(responseNoUserInfo)
                 .verifyComplete();
     }
 
     @Test
-    void getAllHosts(){
+    void getAllHosts() {
         Host host1 = new Host();
         host1.setHostId("hostId1");
         host1.setUserId("userId1");
@@ -74,14 +75,15 @@ public class HostServiceTest {
 
         HostDetails hostDetails1 = new HostDetails(host1, user1);
         HostDetails hostDetails2 = new HostDetails(host2, user2);
-        HostDetails hostDetails3 = new HostDetails(host1,null);
+        HostDetails hostDetails3 = new HostDetails(host1, null);
         HostDetails hostDetails4 = new HostDetails(host2, null);
 
-        HostSearchResponse responseWithUserInfo = new HostSearchResponse("Retrieved all hosts with user info", List.of(hostDetails1, hostDetails2));
-        HostSearchResponse responseNoUserInfo = new HostSearchResponse("Retrieved all hosts without user info", List.of(hostDetails3,hostDetails4));
+        HostSearchResponse responseWithUserInfo = new HostSearchResponse("Retrieved all hosts with user info",
+                List.of(hostDetails1, hostDetails2));
+        HostSearchResponse responseNoUserInfo = new HostSearchResponse("Retrieved all hosts without user info",
+                List.of(hostDetails3, hostDetails4));
 
         Mockito.when(hostRepository.findAll()).thenReturn(Flux.just(host1, host2));
-        Mockito.when(userRepository.findByUserId(Mockito.anyString())).thenReturn(Mono.just(user1), Mono.just(user2));
 
         StepVerifier.create(hostService.getAllHosts(true))
                 .expectNext(responseWithUserInfo)
@@ -93,7 +95,7 @@ public class HostServiceTest {
     }
 
     @Test
-    void updateHostGivenHostId(){
+    void updateHostGivenHostId() {
         HostCreateUpdateRequest request = new HostCreateUpdateRequest();
 
         Host requestHost = new Host();
@@ -107,7 +109,7 @@ public class HostServiceTest {
         Host existingHost = new Host();
         existingHost.setHostId("hostId1");
 
-        HostCreateUpdateResponse response = new HostCreateUpdateResponse("Updated host hostId1",requestHost,null);
+        HostCreateUpdateResponse response = new HostCreateUpdateResponse("Updated host hostId1", requestHost, null);
 
         Mockito.when(hostRepository.findByHostId(Mockito.anyString())).thenReturn(Mono.just(existingHost));
         Mockito.when(hostRepository.save(Mockito.any())).thenReturn(Mono.just(requestHost));
@@ -117,9 +119,8 @@ public class HostServiceTest {
                 .verifyComplete();
     }
 
-
     @Test
-    void updateHostAndUserGivenHostId(){
+    void updateHostAndUserGivenHostId() {
         HostCreateUpdateRequest request = new HostCreateUpdateRequest();
 
         Host requestHost = new Host();
@@ -142,13 +143,13 @@ public class HostServiceTest {
         request.setIsAddressUpdate(Boolean.FALSE);
         request.setIsUserUpdate(Boolean.TRUE);
 
-        HostCreateUpdateResponse response = new HostCreateUpdateResponse("Updated host hostId1",requestHost,requestUser);
+        HostCreateUpdateResponse response = new HostCreateUpdateResponse("Updated host hostId1", requestHost,
+                requestUser);
 
         Mockito.when(hostRepository.findByHostId(Mockito.anyString())).thenReturn(Mono.just(existingHost));
         Mockito.when(hostRepository.save(Mockito.any())).thenReturn(Mono.just(requestHost));
         Mockito.when(userRepository.findByUserId(Mockito.anyString())).thenReturn(Mono.just(existingUser));
         Mockito.when(userRepository.save(Mockito.any())).thenReturn(Mono.just(requestUser));
-
 
         StepVerifier.create(hostService.createUpdateHost(request))
                 .expectNext(response)
@@ -156,12 +157,12 @@ public class HostServiceTest {
     }
 
     @Test
-    void updateHostGivenUserIdAndAddress(){
+    void updateHostGivenUserIdAndAddress() {
         HostCreateUpdateRequest request = new HostCreateUpdateRequest();
 
         Host requestHost = new Host();
 
-        Address hostAddress = new Address("123 Main St.",null,"New York", State.NY,"10001");
+        Address hostAddress = new Address("123 Main St.", null, "New York", State.NY, "10001");
 
         requestHost.setUserId("userId1");
         requestHost.setAddress(hostAddress);
@@ -174,9 +175,10 @@ public class HostServiceTest {
         Host existingHost = new Host();
         existingHost.setAddress(hostAddress);
 
-        HostCreateUpdateResponse response = new HostCreateUpdateResponse("Updated host null",requestHost,null);
+        HostCreateUpdateResponse response = new HostCreateUpdateResponse("Updated host null", requestHost, null);
 
-        Mockito.when(hostRepository.findByUserIdAndAddress(Mockito.anyString(), Mockito.any())).thenReturn(Mono.just(existingHost));
+        Mockito.when(hostRepository.findByUserIdAndAddress(Mockito.anyString(), Mockito.any()))
+                .thenReturn(Mono.just(existingHost));
         Mockito.when(hostRepository.save(Mockito.any())).thenReturn(Mono.just(requestHost));
 
         StepVerifier.create(hostService.createUpdateHost(request))
@@ -200,7 +202,8 @@ public class HostServiceTest {
         request.setIsAddressUpdate(Boolean.FALSE);
         request.setIsUserUpdate(Boolean.FALSE);
 
-        Mockito.when(hostRepository.findByUserIdAndAddress(Mockito.anyString(), Mockito.any())).thenReturn(Mono.empty());
+        Mockito.when(hostRepository.findByUserIdAndAddress(Mockito.anyString(), Mockito.any()))
+                .thenReturn(Mono.empty());
         Mockito.when(hostRepository.save(Mockito.any())).thenReturn(Mono.just(requestHost));
 
         StepVerifier.create(hostService.createUpdateHost(request))
@@ -209,16 +212,16 @@ public class HostServiceTest {
 
     }
 
-//    @Test
-//    void hostUpdateErrors(){
-//        HostUpdateRequest requestNoHostNoUser = new HostUpdateRequest();
-//        StepVerifier.create(hostService.createUpdateHost(requestNoHostNoUser))
-//                .expectErrorMatches(error -> error instanceof GraphQLException)
-//                .verify();
-//    }
+    // @Test
+    // void hostUpdateErrors(){
+    // HostUpdateRequest requestNoHostNoUser = new HostUpdateRequest();
+    // StepVerifier.create(hostService.createUpdateHost(requestNoHostNoUser))
+    // .expectErrorMatches(error -> error instanceof GraphQLException)
+    // .verify();
+    // }
 
     @Test
-    void updateUserInfoGivenUserId(){
+    void updateUserInfoGivenUserId() {
         HostCreateUpdateRequest request = new HostCreateUpdateRequest();
         User requestUser = new User();
 
@@ -243,13 +246,13 @@ public class HostServiceTest {
     }
 
     @Test
-    void updateUserInfoGivenLastNameAndPhone(){
+    void updateUserInfoGivenLastNameAndPhone() {
         HostCreateUpdateRequest request = new HostCreateUpdateRequest();
         User requestUser = new User();
 
         requestUser.setLastName("smith");
-        requestUser.setPhone(List.of(new Phone(Phone.PhoneType.HOME, "1234567890",true)));
-        requestUser.setEmail(List.of(new Email(Email.EmailType.PERSONAL,"gmail@gmail.com",true)));
+        requestUser.setPhone(List.of(new Phone(Phone.PhoneType.HOME, "1234567890", true)));
+        requestUser.setEmail(List.of(new Email(Email.EmailType.PERSONAL, "gmail@gmail.com", true)));
         requestUser.setPrimaryContactMethod(ContactMethod.PHONE);
         requestUser.setLastUpdated("today");
         requestUser.setCreatedDate("yesterday");
@@ -257,28 +260,30 @@ public class HostServiceTest {
         User existingUser = new User();
         existingUser.setLastName("smith");
         existingUser.setPrimaryContactMethod(ContactMethod.PHONE);
-        existingUser.setEmail(List.of(new Email(Email.EmailType.PERSONAL,"email@email.com",true)));
+        existingUser.setEmail(List.of(new Email(Email.EmailType.PERSONAL, "email@email.com", true)));
 
         request.setUser(requestUser);
 
-        Mockito.when(userRepository.findByLastNameAndPrimaryPhone(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(existingUser));
+        Mockito.when(userRepository.findByLastNameAndPrimaryPhone(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(Mono.just(existingUser));
         Mockito.when(userRepository.save(Mockito.any())).thenReturn(Mono.just(requestUser));
 
         HostCreateUpdateResponse response = new HostCreateUpdateResponse();
-        response.setMessage("Updated user null"); // will be null here because if we pass it in with an id, we aren't testing this approach...
+        response.setMessage("Updated user null"); // will be null here because if we pass it in with an id, we aren't
+                                                  // testing this approach...
         response.setUser(requestUser);
 
         StepVerifier.create(hostService.createUpdateHost(request)).expectNext(response).verifyComplete();
     }
 
     @Test
-    void updateUserInfoGivenLastNameAndEmail(){
+    void updateUserInfoGivenLastNameAndEmail() {
         HostCreateUpdateRequest request = new HostCreateUpdateRequest();
         User requestUser = new User();
 
         requestUser.setLastName("smith");
-        requestUser.setPhone(List.of(new Phone(Phone.PhoneType.HOME, "1234567890",true)));
-        requestUser.setEmail(List.of(new Email(Email.EmailType.PERSONAL,"gmail@gmail.com",true)));
+        requestUser.setPhone(List.of(new Phone(Phone.PhoneType.HOME, "1234567890", true)));
+        requestUser.setEmail(List.of(new Email(Email.EmailType.PERSONAL, "gmail@gmail.com", true)));
         requestUser.setPrimaryContactMethod(ContactMethod.EMAIL);
         requestUser.setLastUpdated("today");
         requestUser.setCreatedDate("yesterday");
@@ -286,49 +291,52 @@ public class HostServiceTest {
         User existingUser = new User();
         existingUser.setLastName("smith");
         existingUser.setPrimaryContactMethod(ContactMethod.EMAIL);
-        requestUser.setPhone(List.of(new Phone(Phone.PhoneType.HOME, "1112223333",true)));
-        existingUser.setEmail(List.of(new Email(Email.EmailType.PERSONAL,"email@email.com",true)));
+        requestUser.setPhone(List.of(new Phone(Phone.PhoneType.HOME, "1112223333", true)));
+        existingUser.setEmail(List.of(new Email(Email.EmailType.PERSONAL, "email@email.com", true)));
 
         request.setUser(requestUser);
 
-        Mockito.when(userRepository.findByLastNameAndPrimaryEmail(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(existingUser));
+        Mockito.when(userRepository.findByLastNameAndPrimaryEmail(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(Mono.just(existingUser));
         Mockito.when(userRepository.save(Mockito.any())).thenReturn(Mono.just(requestUser));
 
         HostCreateUpdateResponse response = new HostCreateUpdateResponse();
-        response.setMessage("Updated user null"); // will be null here because if we pass it in with an id, we aren't testing this approach...
+        response.setMessage("Updated user null"); // will be null here because if we pass it in with an id, we aren't
+                                                  // testing this approach...
         response.setUser(requestUser);
 
         StepVerifier.create(hostService.createUpdateHost(request)).expectNext(response).verifyComplete();
     }
 
     @Test
-    void updateUserCreateNewUser(){
+    void updateUserCreateNewUser() {
         HostCreateUpdateRequest request = new HostCreateUpdateRequest();
         User requestUser = new User();
 
         requestUser.setFirstName("sam");
         requestUser.setLastName("smith");
-        requestUser.setPhone(List.of(new Phone(Phone.PhoneType.HOME, "1234567890",true)));
-        requestUser.setEmail(List.of(new Email(Email.EmailType.PERSONAL,"gmail@gmail.com",true)));
+        requestUser.setPhone(List.of(new Phone(Phone.PhoneType.HOME, "1234567890", true)));
+        requestUser.setEmail(List.of(new Email(Email.EmailType.PERSONAL, "gmail@gmail.com", true)));
         requestUser.setPrimaryContactMethod(ContactMethod.EMAIL);
         requestUser.setLastUpdated("today");
         requestUser.setCreatedDate("yesterday");
 
         request.setUser(requestUser);
 
-        Mockito.when(userRepository.findByLastNameAndPrimaryEmail(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.empty());
+        Mockito.when(userRepository.findByLastNameAndPrimaryEmail(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(Mono.empty());
         Mockito.when(userRepository.save(Mockito.any())).thenReturn(Mono.just(requestUser));
 
         HostCreateUpdateResponse response = new HostCreateUpdateResponse();
-        response.setMessage("Created user null"); // will be null here because if we pass it in with an id, we aren't testing this approach...
+        response.setMessage("Created user null"); // will be null here because if we pass it in with an id, we aren't
+                                                  // testing this approach...
         response.setUser(requestUser);
 
         StepVerifier.create(hostService.createUpdateHost(request))
-//                .expectNext(response)
+                // .expectNext(response)
                 .expectNextCount(1)
                 .verifyComplete();
     }
 
-    //todo: error tests
+    // todo: error tests
 }
-
