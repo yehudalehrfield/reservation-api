@@ -20,7 +20,7 @@ public class UserService {
     @Autowired
     UserRepository userRepository;
 
-    public Mono<UserResponse> getAllUsers(){
+    public Mono<UserResponse> getAllUsers() {
         return userRepository.findAll()
                 .collectList()
                 .map(userList -> new UserResponse("Retrieved all users", userList))
@@ -30,10 +30,10 @@ public class UserService {
     public Mono<UserResponse> getUserById(String userId) {
         return userRepository.findByUserId(userId)
                 .map(user -> new UserResponse("Retrieved user " + user.getUserId(), List.of(user)))
-                .switchIfEmpty(Mono.error(new ResGraphException("No user " + userId,HttpStatus.NOT_FOUND)));
+                .switchIfEmpty(Mono.error(new ResGraphException("No user " + userId, HttpStatus.NOT_FOUND)));
     }
 
-    public Mono<UserResponse> createNewUser(User requestUser, String createDateTime){
+    public Mono<UserResponse> createNewUser(User requestUser, String createDateTime) {
         RequestValidatorService.validateCreateUserInfo(requestUser);
         return validateNotExistingUser(requestUser)
                 .flatMap(res -> {
@@ -43,19 +43,25 @@ public class UserService {
                         requestUser.setUserId(ResUtil.generateId());
                         requestUser.setCreatedDate(createDateTime);
                         requestUser.setLastUpdated(createDateTime);
-                        return userRepository.save(requestUser).map(createdUser -> new UserResponse("Created user " + createdUser.getUserId(), List.of(createdUser)));
+                        return userRepository.save(requestUser)
+                                .map(createdUser -> new UserResponse("Created user " + createdUser.getUserId(),
+                                        List.of(createdUser)));
                     }
                 });
 
     }
 
     private Mono<Boolean> validateNotExistingUser(User user) {
-        if (user.getPrimaryContactMethod().equals(ContactMethod.PHONE)){
-            return userRepository.findByLastNameAndPrimaryPhone(user.getLastName(),user.getPhone().stream().filter(Phone::isPrimary).toList().get(0).getValue())
+        if (user.getPrimaryContactMethod().equals(ContactMethod.PHONE)) {
+            return userRepository
+                    .findByLastNameAndPrimaryPhone(user.getLastName(),
+                            user.getPhone().stream().filter(Phone::isPrimary).toList().get(0).getValue())
                     .map(res -> true)
                     .switchIfEmpty(Mono.just(false));
         } else {
-            return userRepository.findByLastNameAndPrimaryEmail(user.getLastName(),user.getEmail().stream().filter(Email::isPrimary).toList().get(0).getValue())
+            return userRepository
+                    .findByLastNameAndPrimaryEmail(user.getLastName(),
+                            user.getEmail().stream().filter(Email::isPrimary).toList().get(0).getValue())
                     .map(res -> true)
                     .switchIfEmpty(Mono.just(false));
         }
@@ -68,16 +74,20 @@ public class UserService {
             return userRepository.findByUserId(userIdToSearch)
                     .flatMap(existingUser -> {
                         User updatedUser = CreateUpdateMapper.updateUser(existingUser, requestUser, updateDateTime);
-                        return userRepository.save(updatedUser).map(user -> new UserResponse("Updated user " + user.getUserId(), List.of(user)));
+                        return userRepository.save(updatedUser)
+                                .map(user -> new UserResponse("Updated user " + user.getUserId(), List.of(user)));
                     })
-                    .switchIfEmpty(Mono.error(new ResGraphException(ResConstants.USER_NOT_FOUND_WITH_ID + requestUser.getUserId(), HttpStatus.NOT_FOUND)));
+                    .switchIfEmpty(Mono.error(new ResGraphException(
+                            ResConstants.USER_NOT_FOUND_WITH_ID + requestUser.getUserId(), HttpStatus.NOT_FOUND)));
         } else if (requestUser.getLastName() != null && requestUser.getPrimaryContactMethod() != null) {
             return fetchByPrimaryContactInfo(requestUser)
                     .flatMap(existingUser -> {
                         User updatedUser = CreateUpdateMapper.updateUser(existingUser, requestUser, updateDateTime);
-                        return userRepository.save(updatedUser).map(user -> new UserResponse("Updated user " + user.getUserId(), List.of(user)));
+                        return userRepository.save(updatedUser)
+                                .map(user -> new UserResponse("Updated user " + user.getUserId(), List.of(user)));
                     })
-                    .switchIfEmpty(Mono.error(new ResGraphException(ResConstants.USER_NOT_FOUND_WITH_ID + requestUser.getUserId(), HttpStatus.NOT_FOUND)));
+                    .switchIfEmpty(Mono.error(new ResGraphException(
+                            ResConstants.USER_NOT_FOUND_WITH_ID + requestUser.getUserId(), HttpStatus.NOT_FOUND)));
         } else {
             throw new ResGraphException(ResConstants.USER_NO_IDENTIFYING_ERROR, HttpStatus.BAD_REQUEST);
         }
@@ -87,13 +97,11 @@ public class UserService {
         if (user.getPrimaryContactMethod().equals(ContactMethod.PHONE)) {
             return userRepository.findByLastNameAndPrimaryPhone(
                     user.getLastName(),
-                    user.getPhone().stream().filter(Phone::isPrimary).toList().get(0).getValue()
-            );
+                    user.getPhone().stream().filter(Phone::isPrimary).toList().get(0).getValue());
         } else {
             return userRepository.findByLastNameAndPrimaryEmail(
                     user.getLastName(),
-                    user.getEmail().stream().filter(Email::isPrimary).toList().get(0).getValue()
-            );
+                    user.getEmail().stream().filter(Email::isPrimary).toList().get(0).getValue());
         }
     }
 

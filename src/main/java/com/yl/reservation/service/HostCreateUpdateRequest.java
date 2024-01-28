@@ -12,8 +12,10 @@ import lombok.NoArgsConstructor;
 public class HostCreateUpdateRequest {
     private Host host;
     private User user;
-    //todo: can i use a primitive here? alternatively, remove this field here and just use a gql field.
+    // todo: can i use a primitive here? alternatively, remove this field here and
+    // just use a gql field.
     private Boolean isUserUpdate;
-    //todo: remove isAddressUpdate
+    // todo: remove isAddressUpdate --> this will be handled with changes to the
+    // host api's
     private Boolean isAddressUpdate;
 }

@@ -39,6 +39,7 @@ public class RequestValidatorService {
             user.getEmail().forEach(email -> validateEmail(email.getValue()));
         }
         // todo: check this
+        // problem: then we cannot search for an existing user...
         if (user.getPrimaryContactMethod() != null && user.getUserId() == null) {
             throw new ResException("Cannot update primary contact method without userId", HttpStatus.BAD_REQUEST);
         }
@@ -47,6 +48,7 @@ public class RequestValidatorService {
     public static void validateCreateHostInfo(Host host) {
         // todo: there may be a scenario where we will not need userId (if we are
         // creating a user...)
+        // this will be handled with changes to the host api's
         if (host.getUserId() == null)
             throw new ResGraphException("userId is missing from the request", HttpStatus.BAD_REQUEST);
         if (host.getAddress() == null)
