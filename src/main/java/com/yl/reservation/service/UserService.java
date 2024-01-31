@@ -22,9 +22,9 @@ public class UserService {
 
     public Mono<UserResponse> getAllUsers(){
         return userRepository.findAll()
+                .switchIfEmpty(Mono.error(new ResGraphException("No users found", HttpStatus.NOT_FOUND)))
                 .collectList()
-                .map(userList -> new UserResponse("Retrieved all users", userList))
-                .switchIfEmpty(Mono.error(new ResGraphException("No users found", HttpStatus.NOT_FOUND)));
+                .map(userList -> new UserResponse("Retrieved all users", userList));
     }
 
     public Mono<UserResponse> getUserById(String userId) {

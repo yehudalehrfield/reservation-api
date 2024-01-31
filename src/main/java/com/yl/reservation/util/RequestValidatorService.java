@@ -39,9 +39,9 @@ public class RequestValidatorService {
             user.getEmail().forEach(email -> validateEmail(email.getValue()));
         }
         // todo: check this
-        if (user.getPrimaryContactMethod() != null && user.getUserId() == null) {
-            throw new ResException("Cannot update primary contact method without userId", HttpStatus.BAD_REQUEST);
-        }
+//        if (user.getPrimaryContactMethod() != null && user.getUserId() == null) {
+//            throw new ResException("Cannot update primary contact method without userId", HttpStatus.BAD_REQUEST);
+//        }
     }
 
     public static void validateCreateHostInfo(Host host) {

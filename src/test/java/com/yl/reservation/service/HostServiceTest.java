@@ -84,6 +84,7 @@ public class HostServiceTest {
                 List.of(hostDetails3, hostDetails4));
 
         Mockito.when(hostRepository.findAll()).thenReturn(Flux.just(host1, host2));
+        Mockito.when(userRepository.findByUserId(Mockito.anyString())).thenReturn(Mono.just(user1), Mono.just(user2));
 
         StepVerifier.create(hostService.getAllHosts(true))
                 .expectNext(responseWithUserInfo)

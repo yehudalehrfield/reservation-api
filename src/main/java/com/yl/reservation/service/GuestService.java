@@ -128,7 +128,7 @@ public class GuestService {
                     })
                     .switchIfEmpty(Mono.error(new ResGraphException(ResConstants.GUEST_NOT_FOUND_WITH_ID + requestGuest.getGuestId(), HttpStatus.NOT_FOUND)));
         } else {
-            throw new ResGraphException(ResConstants.GUEST_NO_IDENTIFYING_ERROR, HttpStatus.BAD_REQUEST);
+            return Mono.error(new ResGraphException(ResConstants.GUEST_NO_IDENTIFYING_ERROR, HttpStatus.BAD_REQUEST));
         }
     }
 
