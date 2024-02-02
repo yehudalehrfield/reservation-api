@@ -10,9 +10,4 @@ public interface HostRepository extends ReactiveMongoRepository<Host, String> {
 
     Mono<Host> findByHostId(String hostId);
 
-//    @Query(value = "{$and: [{'lastName': ?0}, { 'phone' : {$elemMatch: { 'value' : ?1} } }] }")
-//    Flux<Host> findByLastNameAndPrimaryPhone(String lastName, String phone);
-
-//    @Query(value = "{$and: [{'lastName': ?0}, { 'email' : {$elemMatch: { 'value' : ?1} } }] }")
-//    Flux<Host> findByLastNameAndPrimaryEmail(String lastName, String email);
 }

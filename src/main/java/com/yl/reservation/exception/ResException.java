@@ -7,12 +7,13 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
+//todo: remove this class entirely?
 @Data
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties({"cause", "stackTrace","message","localizedMessage","suppressed"})
-public class HostException extends RuntimeException{
-    private HttpStatus status;
+public class ResException extends RuntimeException{
     private String message;
+    private HttpStatus status;
 }

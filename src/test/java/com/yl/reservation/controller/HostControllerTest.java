@@ -75,25 +75,28 @@ public class HostControllerTest {
         Mockito.when(hostService.getHostById("hostId",true)).thenReturn(Mono.just(responseUserInfo));
         Mockito.when(hostService.getHostById("hostId",false)).thenReturn(Mono.just(responseNoUserInfo));
 
-        StepVerifier.create(hostController.hostById("hostId",true))
+        StepVerifier.create(hostController.getHostById("hostId",true))
                 .expectNext(responseUserInfo)
                 .verifyComplete();
 
-        StepVerifier.create(hostController.hostById("hostId",false))
+        StepVerifier.create(hostController.getHostById("hostId",false))
                 .expectNext(responseNoUserInfo)
                 .verifyComplete();
     }
+
 
     @Test
     void createUpdateHost(){
         Host host = new Host();
         host.setHostId("hostId");
         host.setUserId("userId");
+        host.setCreatedDate("today");
+        host.setLastUpdated("today");
         User user = new User();
         user.setUserId("userId");
-        HostUpdateRequest request = new HostUpdateRequest(host,user,Boolean.FALSE, Boolean.FALSE);
+        HostCreateUpdateRequest request = new HostCreateUpdateRequest(host,user,Boolean.FALSE, Boolean.FALSE);
 
-        HostUpdateResponse response = new HostUpdateResponse("success", host, user);
+        HostCreateUpdateResponse response = new HostCreateUpdateResponse("success", host, user);
 
         Mockito.when(hostService.createUpdateHost(request)).thenReturn(Mono.just(response));
 

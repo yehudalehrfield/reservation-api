@@ -6,21 +6,18 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
-
-@Document(collection="guest")
+@Document(collection = "reservation")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Guest {
+public class Reservation {
     @Id
     private String id;
+    private String reservationId;
+    private String hostId;
     private String guestId;
-    private String userId;
-    private String nickName;
-    private int numAdults;
-    private int numChildren;
-    private Boolean crib;
+    private String startDate;
+    private String endDate;
     private String notes;
     private String createdDate;
     private String lastUpdated;

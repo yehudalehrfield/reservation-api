@@ -13,11 +13,21 @@ public class GraphExceptionResolver extends DataFetcherExceptionResolverAdapter 
     @Override
     protected GraphQLError resolveToSingleError(Throwable ex, DataFetchingEnvironment env){
         GraphqlErrorBuilder<?> gqlErrorBuilder = GraphqlErrorBuilder.newError();
-        if (ex instanceof GraphQLException graphQLException){
-            gqlErrorBuilder.message(graphQLException.getMessage());
-            if (graphQLException.getErrorCode().toString().contains(HttpStatus.NOT_FOUND.toString())) {
+        if (ex instanceof ResGraphException resGraphException){
+            gqlErrorBuilder.message(resGraphException.getMessage());
+            if (resGraphException.getErrorCode().toString().contains(HttpStatus.NOT_FOUND.toString())) {
                 gqlErrorBuilder.errorType(ErrorType.NOT_FOUND);
-            } else if (graphQLException.getErrorCode().toString().contains(HttpStatus.BAD_REQUEST.toString())) {
+            } else if (resGraphException.getErrorCode().toString().contains(HttpStatus.BAD_REQUEST.toString())) {
+                gqlErrorBuilder.errorType(ErrorType.BAD_REQUEST);
+            } else {
+                gqlErrorBuilder.errorType(ErrorType.INTERNAL_ERROR);
+            }
+        }
+        if (ex instanceof  ResException resException){
+            gqlErrorBuilder.message(resException.getMessage());
+            if (resException.getStatus().equals(HttpStatus.NOT_FOUND)) {
+                gqlErrorBuilder.errorType(ErrorType.NOT_FOUND);
+            } else if (resException.getStatus().equals(HttpStatus.BAD_REQUEST)) {
                 gqlErrorBuilder.errorType(ErrorType.BAD_REQUEST);
             } else {
                 gqlErrorBuilder.errorType(ErrorType.INTERNAL_ERROR);
