@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 
@@ -15,12 +14,12 @@ import java.util.Map;
 @Data
 public class ResLogger {
 
-//    @Autowired
-//    private HttpServletRequest reservationRequest;
+    // @Autowired
+    // private HttpServletRequest reservationRequest;
 
     private static final Logger logger = LoggerFactory.getLogger(ResLogger.class);
 
-    private HttpMethod requestMethod; //todo: remove this?
+    private HttpMethod requestMethod; // todo: remove this?
     private String query;
     private String requestUrl;
     private String requestBody;
@@ -37,8 +36,8 @@ public class ResLogger {
         this.query = query;
     }
 
-    public void log(){
-        if (responseStatus.is2xxSuccessful()){
+    public void log() {
+        if (responseStatus.is2xxSuccessful()) {
             logger.info(this.toString());
         } else {
             logger.error(this.toString());
@@ -59,7 +58,7 @@ public class ResLogger {
         this.setRequestHeaders(headerMap);
     }
 
-    public void setValuesToLogger(HttpStatus responseStatus, String responseBody){
+    public void setValuesToLogger(HttpStatus responseStatus, String responseBody) {
         this.setEndTime(System.currentTimeMillis());
 
         this.setResponseStatus(responseStatus);

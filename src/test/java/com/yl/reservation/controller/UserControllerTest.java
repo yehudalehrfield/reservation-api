@@ -5,7 +5,6 @@ import com.yl.reservation.model.User;
 import com.yl.reservation.service.UserCreateUpdateRequest;
 import com.yl.reservation.service.UserResponse;
 import com.yl.reservation.service.UserService;
-import com.yl.reservation.util.ResUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,7 +27,7 @@ public class UserControllerTest {
     UserService userService;
 
     @Test
-    void getAllUsers(){
+    void getAllUsers() {
         User user1 = new User();
         user1.setUserId("userId1");
         User user2 = new User();
@@ -44,14 +43,11 @@ public class UserControllerTest {
     }
 
     @Test
-    void getAllUsers_Error(){
+    void getAllUsers_Error() {
         User user1 = new User();
         user1.setUserId("userId1");
         User user2 = new User();
         user2.setUserId("userId2");
-
-        UserResponse userResponse = new UserResponse("Retrieved all users", List.of(user1, user2));
-
         ResGraphException exception = new ResGraphException("error", HttpStatus.INTERNAL_SERVER_ERROR);
         Mockito.when(userService.getAllUsers()).thenReturn(Mono.error(exception));
 
@@ -61,7 +57,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void getUserById(){
+    void getUserById() {
         String userId = "userId1";
         User user = new User();
         user.setUserId(userId);
@@ -76,7 +72,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void getUserById_notFoundError(){
+    void getUserById_notFoundError() {
         String userId = "invalidUserId";
         String errorMessage = "User " + userId + " not found";
 
@@ -88,7 +84,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void createUser(){
+    void createUser() {
         UserCreateUpdateRequest request = new UserCreateUpdateRequest();
         User user = new User();
         request.setUser(user);
@@ -103,7 +99,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void createUser_Error(){
+    void createUser_Error() {
         UserCreateUpdateRequest request = new UserCreateUpdateRequest();
         User user = new User();
         request.setUser(user);
@@ -118,7 +114,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void updateUser(){
+    void updateUser() {
         UserCreateUpdateRequest request = new UserCreateUpdateRequest();
         User user = new User();
         user.setUserId("userId");
@@ -134,7 +130,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void updateUser_Error(){
+    void updateUser_Error() {
         UserCreateUpdateRequest request = new UserCreateUpdateRequest();
         User user = new User();
         user.setUserId("userId");
