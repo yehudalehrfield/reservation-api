@@ -119,7 +119,7 @@ public class GuestControllerTest {
 
         GuestCreateUpdateResponse response = new GuestCreateUpdateResponse("Guest created successfully", guest);
 
-        Mockito.when(guestService.createNewGuest(Mockito.any(), Mockito.anyString())).thenReturn(Mono.just(response));
+        Mockito.when(guestService.createGuest(Mockito.any(), Mockito.anyString())).thenReturn(Mono.just(response));
 
         StepVerifier.create(guestController.createGuest(request))
                 .expectNext(response)
@@ -135,7 +135,7 @@ public class GuestControllerTest {
 
         ResGraphException exception = new ResGraphException("error", HttpStatus.INTERNAL_SERVER_ERROR);
 
-        Mockito.when(guestService.createNewGuest(Mockito.any(), Mockito.anyString())).thenReturn(Mono.error(exception));
+        Mockito.when(guestService.createGuest(Mockito.any(), Mockito.anyString())).thenReturn(Mono.error(exception));
 
         StepVerifier.create(guestController.createGuest(request))
                 .expectErrorMatches(error -> error.equals(exception))

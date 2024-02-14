@@ -44,7 +44,7 @@ public class UserService {
                         requestUser.setCreatedDate(createDateTime);
                         requestUser.setLastUpdated(createDateTime);
                         return userRepository.save(requestUser)
-                                .map(createdUser -> new UserResponse("Created user " + createdUser.getUserId(),
+                                .map(createdUser -> new UserResponse(ResConstants.USER_CREATE + createdUser.getUserId(),
                                         List.of(createdUser)));
                     }
                 });
@@ -75,7 +75,7 @@ public class UserService {
                     .flatMap(existingUser -> {
                         User updatedUser = CreateUpdateMapper.updateUser(existingUser, requestUser, updateDateTime);
                         return userRepository.save(updatedUser)
-                                .map(user -> new UserResponse("Updated user " + user.getUserId(), List.of(user)));
+                                .map(user -> new UserResponse(ResConstants.USER_UPDATE + user.getUserId(), List.of(user)));
                     })
                     .switchIfEmpty(Mono.error(new ResGraphException(
                             ResConstants.USER_NOT_FOUND_WITH_ID + requestUser.getUserId(), HttpStatus.NOT_FOUND)));
@@ -84,7 +84,7 @@ public class UserService {
                     .flatMap(existingUser -> {
                         User updatedUser = CreateUpdateMapper.updateUser(existingUser, requestUser, updateDateTime);
                         return userRepository.save(updatedUser)
-                                .map(user -> new UserResponse("Updated user " + user.getUserId(), List.of(user)));
+                                .map(user -> new UserResponse(ResConstants.USER_UPDATE + user.getUserId(), List.of(user)));
                     })
                     .switchIfEmpty(Mono.error(new ResGraphException(
                             ResConstants.USER_NOT_FOUND_WITH_ID + requestUser.getUserId(), HttpStatus.NOT_FOUND)));

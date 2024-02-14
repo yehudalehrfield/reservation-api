@@ -16,9 +16,9 @@ import java.util.regex.Pattern;
 @Service
 public class RequestValidatorService {
 
-    private static final Pattern phoneRegexPattern = Pattern.compile(
+    private static final Pattern PHONE_REGEX_PATTERN = Pattern.compile(
             "^[+]?(\\d{1,2})?[\\s.-]?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$");
-    private static final Pattern emailRegexPattern = Pattern.compile(
+    private static final Pattern EMAIL_REGEX_PATTERN = Pattern.compile(
             "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
     public static void validateCreateUserInfo(User user) {
@@ -38,21 +38,22 @@ public class RequestValidatorService {
         if (user.getEmail() != null) {
             user.getEmail().forEach(email -> validateEmail(email.getValue()));
         }
-        // todo: check this
-        // problem: then we cannot search for an existing user...
-        if (user.getPrimaryContactMethod() != null && user.getUserId() == null) {
-            throw new ResException("Cannot update primary contact method without userId", HttpStatus.BAD_REQUEST);
-        }
+//        if (user.getPrimaryContactMethod() != null && user.getUserId() == null) {
+//            throw new ResException("Cannot update primary contact method without userId", HttpStatus.BAD_REQUEST);
+//        }
     }
 
     public static void validateCreateHostInfo(Host host) {
-        // todo: there may be a scenario where we will not need userId (if we are
-        // creating a user...)
-        // this will be handled with changes to the host api's
         if (host.getUserId() == null)
             throw new ResGraphException("userId is missing from the request", HttpStatus.BAD_REQUEST);
         if (host.getAddress() == null)
             throw new ResGraphException("Address is missing from the request", HttpStatus.BAD_REQUEST);
+    }
+
+    public static void validateUpdateHostInfo(Host host) {
+        if (host.getHostId() == null && host.getAddress() != null) {
+            throw new ResGraphException(ResConstants.HOST_ID_REQUIRED_FOR_ADDRESS_UPDATE, HttpStatus.BAD_REQUEST);
+        }
     }
 
     public static void validateContactInfo(User user) {
@@ -80,14 +81,14 @@ public class RequestValidatorService {
     }
 
     public static void validatePhoneNumber(String phoneNumber) {
-        Matcher matchPhone = phoneRegexPattern.matcher(phoneNumber);
+        Matcher matchPhone = PHONE_REGEX_PATTERN.matcher(phoneNumber);
         if (!matchPhone.find()) {
             throw new ResException("Invalid phone number: " + phoneNumber, HttpStatus.BAD_REQUEST);
         }
     }
 
     public static void validateEmail(String email) {
-        Matcher matchPhone = emailRegexPattern.matcher(email);
+        Matcher matchPhone = EMAIL_REGEX_PATTERN.matcher(email);
         if (!matchPhone.find()) {
             throw new ResException("Invalid email address: " + email, HttpStatus.BAD_REQUEST);
         }
@@ -102,8 +103,10 @@ public class RequestValidatorService {
         }
     }
 
-    public static void validateUpdateGuest(Guest guestToUpdate) {
-
+    public static void validateUpdateGuest(Guest guest) {
+        if (guest.getGuestId() == null && guest.getNickName() != null) {
+            throw new ResException(ResConstants.GUEST_ID_REQUIRED_FOR_NICKNAME_UPDATE, HttpStatus.BAD_REQUEST);
+        }
     }
 
 }

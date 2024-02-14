@@ -1,11 +1,9 @@
  package com.yl.reservation.controller;
 
 import com.yl.reservation.exception.ResGraphException;
-import com.yl.reservation.service.HostService;
-import com.yl.reservation.service.HostCreateUpdateResponse;
-import com.yl.reservation.service.HostSearchResponse;
-import com.yl.reservation.service.HostCreateUpdateRequest;
+import com.yl.reservation.service.*;
 import com.yl.reservation.util.ResLogger;
+import com.yl.reservation.util.ResUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -48,16 +46,43 @@ public class HostController {
     }
 
     @MutationMapping
-    public Mono<HostCreateUpdateResponse> createUpdateHost(@Argument HostCreateUpdateRequest hostCreateUpdateRequest){
-        ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "createUpdateHost");
-        return hostService.createUpdateHost(hostCreateUpdateRequest)
+    public Mono<HostCreateUpdateResponse> createHost(@Argument HostCreateUpdateRequest hostCreateUpdateRequest){
+        ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "createHost");
+        String createDateTime = ResUtil.getCurrentDateTimeString();
+        return hostService.createHost(hostCreateUpdateRequest.getHost(), createDateTime)
                 .doOnSuccess(res -> resLogger.setValuesToLogger(HttpStatus.OK, res.toString()))
                 .onErrorResume(error -> {
-                    resLogger.setValuesToLogger(HttpStatus.INTERNAL_SERVER_ERROR, error.getMessage());
+                    resLogger.setValuesToLogger(HttpStatus.INTERNAL_SERVER_ERROR, null);
                     return Mono.error(error);
                 })
                 .cache();
+
     }
+
+     @MutationMapping
+     Mono<HostCreateUpdateResponse> updateHost(@Argument HostCreateUpdateRequest hostCreateUpdateRequest){
+         ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "updateHost");
+         String updateDateTime = ResUtil.getCurrentDateTimeString();
+         return hostService.updateHost(hostCreateUpdateRequest.getHost(), updateDateTime)
+                 .doOnSuccess(res -> resLogger.setValuesToLogger(HttpStatus.OK, res.toString()))
+                 .onErrorResume(error -> {
+                     resLogger.setValuesToLogger(HttpStatus.INTERNAL_SERVER_ERROR, null);
+                     return Mono.error(error);
+                 })
+                 .cache();
+     }
+
+//    @MutationMapping
+//    public Mono<HostCreateUpdateResponse> createUpdateHost(@Argument HostCreateUpdateRequest hostCreateUpdateRequest){
+//        ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "createUpdateHost");
+//        return hostService.createUpdateHost(hostCreateUpdateRequest)
+//                .doOnSuccess(res -> resLogger.setValuesToLogger(HttpStatus.OK, res.toString()))
+//                .onErrorResume(error -> {
+//                    resLogger.setValuesToLogger(HttpStatus.INTERNAL_SERVER_ERROR, error.getMessage());
+//                    return Mono.error(error);
+//                })
+//                .cache();
+//    }
 
      private static Mono<HostSearchResponse> returnNotFound(ResLogger resLogger, String message){
          resLogger.setValuesToLogger(HttpStatus.NOT_FOUND, null);

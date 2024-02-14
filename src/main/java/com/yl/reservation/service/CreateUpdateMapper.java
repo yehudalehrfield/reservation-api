@@ -15,9 +15,6 @@ public class CreateUpdateMapper {
 
     public static User updateUser(User userToUpdate, User userFromRequest, String updateDateTime) {
         boolean isUserUpdate = isUserUpdate(userToUpdate, userFromRequest);
-        // todo: don't throw exception here. will be a problem when we update host and
-        // user...
-        // this will be handled with changes to the host api's
         if (!isUserUpdate)
             throw new ResGraphException("No updates to apply to user", HttpStatus.BAD_REQUEST);
         if (userFromRequest.getEmail() != null)
@@ -44,9 +41,6 @@ public class CreateUpdateMapper {
 
     public static Guest updateGuest(Guest guestToUpdate, Guest guestFromRequest, String updateDateTime) {
         if (!isGuestUpdate(guestToUpdate, guestFromRequest)) {
-            // todo: don't throw exception here. will be a problem when we update host and
-            // user...
-            // this will be handled with changes to the host api's
             throw new ResException("No updates to apply", HttpStatus.OK);
         } else {
             if (guestFromRequest.getNickName() != null)
@@ -73,7 +67,7 @@ public class CreateUpdateMapper {
             return true;
         if (requestGuest.getNumChildren() != updatedGuest.getNumChildren())
             return true;
-        if (requestGuest.getCrib().equals(updatedGuest.getCrib()))
+        if (requestGuest.getCrib() != null && !requestGuest.getCrib().equals(updatedGuest.getCrib()))
             return true;
         return !requestGuest.getNotes().equals(updatedGuest.getNotes());
     }
@@ -82,12 +76,8 @@ public class CreateUpdateMapper {
     // ║ HOST ║
     // ╚══════╝
 
-    public static Host updateHost(Host hostToUpdate, Host hostFromRequest, boolean isAddressUpdate,
-            String updateDateTime) {
-        if (!isHostUpdate(hostToUpdate, hostFromRequest, isAddressUpdate)) {
-            // todo: don't throw exception here. will be a problem when we update host and
-            // user...
-            // this will be handled with changes to the host api's
+    public static Host updateHost(Host hostToUpdate, Host hostFromRequest, String updateDateTime) {
+        if (!isHostUpdate(hostToUpdate, hostFromRequest)) {
             throw new ResException("No updates to apply", HttpStatus.OK);
         } else {
             if (hostFromRequest.getAddress() != null)
@@ -109,20 +99,16 @@ public class CreateUpdateMapper {
         }
     }
 
-    public static boolean isHostUpdate(Host updatedHost, Host requestHost, boolean isAddressUpdate) {
+    public static boolean isHostUpdate(Host updatedHost, Host requestHost) {
         if (requestHost.getBeds() != updatedHost.getBeds())
             return true;
         if (requestHost.getCrib() != null && !requestHost.getCrib().equals(updatedHost.getCrib()))
             return true;
         if (requestHost.getFullBath() != null && !requestHost.getFullBath().equals(updatedHost.getFullBath()))
             return true;
-        if (requestHost.getPrivateEntrance() != null
-                && !requestHost.getPrivateEntrance().equals(updatedHost.getPrivateEntrance()))
+        if (requestHost.getPrivateEntrance() != null && !requestHost.getPrivateEntrance().equals(updatedHost.getPrivateEntrance()))
             return true;
-        if (requestHost.getNotes() != null && !requestHost.getNotes().equals(updatedHost.getNotes()))
-            return true;
-        return isAddressUpdate && requestHost.getAddress() != null
-                && !requestHost.getAddress().equals(updatedHost.getAddress());
+        return (requestHost.getNotes() != null && !requestHost.getNotes().equals(updatedHost.getNotes()));
     }
 
 }

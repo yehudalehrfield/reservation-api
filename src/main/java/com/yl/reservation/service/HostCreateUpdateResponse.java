@@ -12,5 +12,4 @@ import lombok.NoArgsConstructor;
 public class HostCreateUpdateResponse {
     private String message;
     private Host host;
-    private User user;
 }

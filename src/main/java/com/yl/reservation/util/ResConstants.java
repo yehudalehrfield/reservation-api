@@ -3,13 +3,12 @@ package com.yl.reservation.util;
 public class ResConstants {
     public static final String GENERAL_RESERVATION_ERROR = "Sorry, something went wrong with reservation api...";
 
-    // ERROR MESSAGES
-    public static final String NO_HOST_OR_USER_ERROR = "No host or user included in the request...";
-    public static final String HOST_ID_REQUIRED_FOR_ADDRESS_UPDATE_ERROR = "HostId is required to make an address update";
-    public static final String HOST_NO_IDENTIFYING_ERROR = "Cannot create or update host without identifying details";
+
+    // USER
+    public static final String USER_UPDATE = "Updated user ";
+    public static final String USER_CREATE = "Created user ";
+    public static final String USER_NOT_FOUND_WITH_ID = "No user with id: ";
     public static final String USER_NO_IDENTIFYING_ERROR = "Cannot create or update user without identifying details";
-    public static final String GUEST_NO_IDENTIFYING_ERROR = "Cannot create or update guest without identifying details";
-    public static final String USER_UPDATE_ERROR = "Cannot apply update to user with isUserUpdate not set to true";
 
     // HOST
     public static final String HOST_FIND = "Retrieved host ";
@@ -18,6 +17,9 @@ public class ResConstants {
     public static final String HOST_UPDATE = "Updated host ";
     public static final String HOST_CREATE = "Created host ";
     public static final String HOST_NOT_FOUND_WITH_ID = "No host with id: ";
+    public static final String HOST_NOT_FOUND_USER_ID_ADDRESS = "Host not found with userId: %s and address: %s";
+    public static final String HOST_NO_IDENTIFYING_ERROR = "Cannot create or update host without identifying details";
+    public static final String HOST_ID_REQUIRED_FOR_ADDRESS_UPDATE = "hostId is required to make an address update";
 
     // GUEST
     public static final String GUEST_FIND = "Retrieved guest ";
@@ -26,11 +28,9 @@ public class ResConstants {
     public static final String GUEST_UPDATE = "Updated guest ";
     public static final String GUEST_CREATE = "Created guest ";
     public static final String GUEST_NOT_FOUND_WITH_ID = "No guest with id: ";
-
-    // USER
-    public static final String USER_UPDATE = "Updated user ";
-    public static final String USER_CREATE = "Created user ";
-    public static final String USER_NOT_FOUND_WITH_ID = "No user with id: ";
+    public static final String GUEST_NOT_FOUND_USER_ID_NICKNAME =  "Guest not found with userId: %s and nickname: %s";
+    public static final String GUEST_NO_IDENTIFYING_ERROR = "Cannot create or update guest without identifying details";
+    public static final String GUEST_ID_REQUIRED_FOR_NICKNAME_UPDATE = "guestId is required to make a nickname update";
 
     // UTIL
     // public static

@@ -1,14 +1,18 @@
 package com.yl.reservation.service;
 
+import com.yl.reservation.exception.ResGraphException;
 import com.yl.reservation.model.*;
 import com.yl.reservation.repository.HostRepository;
 import com.yl.reservation.repository.UserRepository;
+import com.yl.reservation.util.ResConstants;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -104,55 +108,16 @@ public class HostServiceTest {
         requestHost.setNotes("new notes");
 
         request.setHost(requestHost);
-        request.setIsAddressUpdate(Boolean.FALSE);
-        request.setIsUserUpdate(Boolean.FALSE);
 
         Host existingHost = new Host();
         existingHost.setHostId("hostId1");
 
-        HostCreateUpdateResponse response = new HostCreateUpdateResponse("Updated host hostId1", requestHost, null);
+        HostCreateUpdateResponse response = new HostCreateUpdateResponse("Updated host hostId1", requestHost);
 
         Mockito.when(hostRepository.findByHostId(Mockito.anyString())).thenReturn(Mono.just(existingHost));
         Mockito.when(hostRepository.save(Mockito.any())).thenReturn(Mono.just(requestHost));
 
-        StepVerifier.create(hostService.createUpdateHost(request))
-                .expectNext(response)
-                .verifyComplete();
-    }
-
-    @Test
-    void updateHostAndUserGivenHostId() {
-        HostCreateUpdateRequest request = new HostCreateUpdateRequest();
-
-        Host requestHost = new Host();
-        requestHost.setHostId("hostId1");
-        requestHost.setUserId("userId1");
-        requestHost.setNotes("new notes");
-
-        User requestUser = new User();
-        requestUser.setUserId("userId1");
-        requestUser.setPrimaryContactMethod(ContactMethod.EMAIL);
-
-        Host existingHost = new Host();
-        existingHost.setHostId("hostId1");
-
-        User existingUser = new User();
-        existingUser.setPrimaryContactMethod(ContactMethod.PHONE);
-
-        request.setHost(requestHost);
-        request.setUser(requestUser);
-        request.setIsAddressUpdate(Boolean.FALSE);
-        request.setIsUserUpdate(Boolean.TRUE);
-
-        HostCreateUpdateResponse response = new HostCreateUpdateResponse("Updated host hostId1", requestHost,
-                requestUser);
-
-        Mockito.when(hostRepository.findByHostId(Mockito.anyString())).thenReturn(Mono.just(existingHost));
-        Mockito.when(hostRepository.save(Mockito.any())).thenReturn(Mono.just(requestHost));
-        Mockito.when(userRepository.findByUserId(Mockito.anyString())).thenReturn(Mono.just(existingUser));
-        Mockito.when(userRepository.save(Mockito.any())).thenReturn(Mono.just(requestUser));
-
-        StepVerifier.create(hostService.createUpdateHost(request))
+        StepVerifier.create(hostService.updateHost(request.getHost(), "today"))
                 .expectNext(response)
                 .verifyComplete();
     }
@@ -170,25 +135,19 @@ public class HostServiceTest {
         requestHost.setNotes("new notes");
 
         request.setHost(requestHost);
-        request.setIsAddressUpdate(Boolean.FALSE);
-        request.setIsUserUpdate(Boolean.FALSE);
 
         Host existingHost = new Host();
         existingHost.setAddress(hostAddress);
 
-        HostCreateUpdateResponse response = new HostCreateUpdateResponse("Updated host null", requestHost, null);
+        ResGraphException expectedError = new ResGraphException(ResConstants.HOST_ID_REQUIRED_FOR_ADDRESS_UPDATE, HttpStatus.BAD_REQUEST);
 
-        Mockito.when(hostRepository.findByUserIdAndAddress(Mockito.anyString(), Mockito.any()))
-                .thenReturn(Mono.just(existingHost));
-        Mockito.when(hostRepository.save(Mockito.any())).thenReturn(Mono.just(requestHost));
+        ResGraphException actualError = Assertions.assertThrows(ResGraphException.class, () -> hostService.updateHost(request.getHost(), "today"));
+        Assertions.assertEquals(expectedError, actualError);
 
-        StepVerifier.create(hostService.createUpdateHost(request))
-                .expectNext(response)
-                .verifyComplete();
     }
 
     @Test
-    void updateHostCreateNewHost() {
+    void createHost() {
         HostCreateUpdateRequest request = new HostCreateUpdateRequest();
 
         Host requestHost = new Host();
@@ -200,144 +159,17 @@ public class HostServiceTest {
         requestHost.setNotes("new notes");
 
         request.setHost(requestHost);
-        request.setIsAddressUpdate(Boolean.FALSE);
-        request.setIsUserUpdate(Boolean.FALSE);
 
         Mockito.when(hostRepository.findByUserIdAndAddress(Mockito.anyString(), Mockito.any()))
                 .thenReturn(Mono.empty());
         Mockito.when(hostRepository.save(Mockito.any())).thenReturn(Mono.just(requestHost));
 
-        StepVerifier.create(hostService.createUpdateHost(request))
+        StepVerifier.create(hostService.createHost(request.getHost(), "today"))
                 .expectNextCount(1)
                 .verifyComplete();
 
     }
 
-    // @Test
-    // void hostUpdateErrors(){
-    // HostUpdateRequest requestNoHostNoUser = new HostUpdateRequest();
-    // StepVerifier.create(hostService.createUpdateHost(requestNoHostNoUser))
-    // .expectErrorMatches(error -> error instanceof GraphQLException)
-    // .verify();
-    // }
-
-    @Test
-    void updateUserInfoGivenUserId() {
-        HostCreateUpdateRequest request = new HostCreateUpdateRequest();
-        User requestUser = new User();
-
-        requestUser.setUserId("userId1");
-        requestUser.setPrimaryContactMethod(ContactMethod.EMAIL);
-        requestUser.setLastUpdated("today");
-        requestUser.setCreatedDate("yesterday");
-
-        User existingUser = new User();
-        existingUser.setPrimaryContactMethod(ContactMethod.PHONE);
-
-        request.setUser(requestUser);
-
-        Mockito.when(userRepository.findByUserId(Mockito.anyString())).thenReturn(Mono.just(existingUser));
-        Mockito.when(userRepository.save(Mockito.any())).thenReturn(Mono.just(requestUser));
-
-        HostCreateUpdateResponse response = new HostCreateUpdateResponse();
-        response.setMessage("Updated user userId1");
-        response.setUser(requestUser);
-
-        StepVerifier.create(hostService.createUpdateHost(request)).expectNext(response).verifyComplete();
-    }
-
-    @Test
-    void updateUserInfoGivenLastNameAndPhone() {
-        HostCreateUpdateRequest request = new HostCreateUpdateRequest();
-        User requestUser = new User();
-
-        requestUser.setLastName("smith");
-        requestUser.setPhone(List.of(new Phone(Phone.PhoneType.HOME, "1234567890", true)));
-        requestUser.setEmail(List.of(new Email(Email.EmailType.PERSONAL, "gmail@gmail.com", true)));
-        requestUser.setPrimaryContactMethod(ContactMethod.PHONE);
-        requestUser.setLastUpdated("today");
-        requestUser.setCreatedDate("yesterday");
-
-        User existingUser = new User();
-        existingUser.setLastName("smith");
-        existingUser.setPrimaryContactMethod(ContactMethod.PHONE);
-        existingUser.setEmail(List.of(new Email(Email.EmailType.PERSONAL, "email@email.com", true)));
-
-        request.setUser(requestUser);
-
-        Mockito.when(userRepository.findByLastNameAndPrimaryPhone(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(Mono.just(existingUser));
-        Mockito.when(userRepository.save(Mockito.any())).thenReturn(Mono.just(requestUser));
-
-        HostCreateUpdateResponse response = new HostCreateUpdateResponse();
-        response.setMessage("Updated user null"); // will be null here because if we pass it in with an id, we aren't
-                                                  // testing this approach...
-        response.setUser(requestUser);
-
-        StepVerifier.create(hostService.createUpdateHost(request)).expectNext(response).verifyComplete();
-    }
-
-    @Test
-    void updateUserInfoGivenLastNameAndEmail() {
-        HostCreateUpdateRequest request = new HostCreateUpdateRequest();
-        User requestUser = new User();
-
-        requestUser.setLastName("smith");
-        requestUser.setPhone(List.of(new Phone(Phone.PhoneType.HOME, "1234567890", true)));
-        requestUser.setEmail(List.of(new Email(Email.EmailType.PERSONAL, "gmail@gmail.com", true)));
-        requestUser.setPrimaryContactMethod(ContactMethod.EMAIL);
-        requestUser.setLastUpdated("today");
-        requestUser.setCreatedDate("yesterday");
-
-        User existingUser = new User();
-        existingUser.setLastName("smith");
-        existingUser.setPrimaryContactMethod(ContactMethod.EMAIL);
-        requestUser.setPhone(List.of(new Phone(Phone.PhoneType.HOME, "1112223333", true)));
-        existingUser.setEmail(List.of(new Email(Email.EmailType.PERSONAL, "email@email.com", true)));
-
-        request.setUser(requestUser);
-
-        Mockito.when(userRepository.findByLastNameAndPrimaryEmail(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(Mono.just(existingUser));
-        Mockito.when(userRepository.save(Mockito.any())).thenReturn(Mono.just(requestUser));
-
-        HostCreateUpdateResponse response = new HostCreateUpdateResponse();
-        response.setMessage("Updated user null"); // will be null here because if we pass it in with an id, we aren't
-                                                  // testing this approach...
-        response.setUser(requestUser);
-
-        StepVerifier.create(hostService.createUpdateHost(request)).expectNext(response).verifyComplete();
-    }
-
-    @Test
-    void updateUserCreateNewUser() {
-        HostCreateUpdateRequest request = new HostCreateUpdateRequest();
-        User requestUser = new User();
-
-        requestUser.setFirstName("sam");
-        requestUser.setLastName("smith");
-        requestUser.setPhone(List.of(new Phone(Phone.PhoneType.HOME, "1234567890", true)));
-        requestUser.setEmail(List.of(new Email(Email.EmailType.PERSONAL, "gmail@gmail.com", true)));
-        requestUser.setPrimaryContactMethod(ContactMethod.EMAIL);
-        requestUser.setLastUpdated("today");
-        requestUser.setCreatedDate("yesterday");
-
-        request.setUser(requestUser);
-
-        Mockito.when(userRepository.findByLastNameAndPrimaryEmail(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(Mono.empty());
-        Mockito.when(userRepository.save(Mockito.any())).thenReturn(Mono.just(requestUser));
-
-        HostCreateUpdateResponse response = new HostCreateUpdateResponse();
-        response.setMessage("Created user null"); // will be null here because if we pass it in with an id, we aren't
-                                                  // testing this approach...
-        response.setUser(requestUser);
-
-        StepVerifier.create(hostService.createUpdateHost(request))
-                // .expectNext(response)
-                .expectNextCount(1)
-                .verifyComplete();
-    }
 
     // todo: error tests
 }
