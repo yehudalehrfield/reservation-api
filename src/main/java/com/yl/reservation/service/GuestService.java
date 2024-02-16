@@ -104,7 +104,7 @@ public class GuestService {
                                     return guestRepository.save(requestGuest).map(createdGuest -> new GuestCreateUpdateResponse(
                                             ResConstants.GUEST_CREATE + createdGuest.getGuestId(), createdGuest));
                                 })
-                                .switchIfEmpty(Mono.error(new ResGraphException("No user with id: " + requestGuest.getUserId(), HttpStatus.BAD_REQUEST)));
+                                .switchIfEmpty(Mono.error(new ResGraphException(ResConstants.USER_NOT_FOUND_WITH_ID + requestGuest.getUserId(), HttpStatus.BAD_REQUEST)));
                     }
                 });
     }

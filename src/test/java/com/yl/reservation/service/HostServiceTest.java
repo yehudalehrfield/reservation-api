@@ -233,4 +233,22 @@ public class HostServiceTest {
 
     }
 
+    @Test
+    void createNewGuest_noSuchUser() {
+        Host requestHost = new Host();
+        requestHost.setUserId("userId1");
+
+        Address hostAddress = new Address("123 Main St.", null, "New York", State.NY, "10001");
+        requestHost.setAddress(hostAddress);
+
+        Mockito.when(hostRepository.findByUserIdAndAddress(Mockito.anyString(), Mockito.any())).thenReturn(Mono.empty());
+        Mockito.when(userRepository.findByUserId(Mockito.any())).thenReturn(Mono.empty());
+
+        ResGraphException error = new ResGraphException("No user with id: userId1", HttpStatus.BAD_REQUEST);
+
+        StepVerifier.create(hostService.createHost(requestHost, "today"))
+                .expectErrorMatches(errorResponse -> errorResponse.equals(error))
+                .verify();
+    }
+
 }

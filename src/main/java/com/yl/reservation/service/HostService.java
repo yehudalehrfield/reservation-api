@@ -76,13 +76,11 @@ public class HostService {
                         return userRepository.findByUserId(host.getUserId())
                                 .flatMap(user -> {
                                     hostDetails.setUser(user);
-                                    response.setMessage(
-                                            ResConstants.HOST_FIND + host.getHostId() + " with user info...");
+                                    response.setMessage(ResConstants.HOST_FIND + host.getHostId() + " with user info...");
                                     return Mono.just(response);
                                 })
                                 .switchIfEmpty(Mono.error(new ResGraphException(
-                                        ResConstants.USER_NOT_FOUND_WITH_ID + host.getUserId() + " for host " + hostId,
-                                        HttpStatus.NOT_FOUND)));
+                                        ResConstants.USER_NOT_FOUND_WITH_ID + host.getUserId() + " for host " + hostId, HttpStatus.NOT_FOUND)));
                     }
                     // if no user info is requested return response with no user info
                     response.setMessage(ResConstants.HOST_FIND + host.getHostId());
@@ -95,13 +93,19 @@ public class HostService {
         return validateNotExistingHost(requestHost)
                 .flatMap(res -> {
                     if (res.equals(Boolean.TRUE)) {
-                        return Mono.error(new ResGraphException(ResConstants.HOST_ALREADY_EXISTS_ERROR, HttpStatus.BAD_REQUEST));
+                        return Mono.error(new ResGraphException(ResConstants.HOST_ALREADY_EXISTS_ERROR,
+                                HttpStatus.BAD_REQUEST));
                     } else {
-                        requestHost.setHostId(ResUtil.generateId());
-                        requestHost.setCreatedDate(createDateTime);
-                        requestHost.setLastUpdated(createDateTime);
-                        return hostRepository.save(requestHost)
-                                .map(createdHost -> new HostCreateUpdateResponse(ResConstants.HOST_CREATE + createdHost.getHostId(), createdHost));
+                        return userRepository.findByUserId(requestHost.getUserId())
+                                .flatMap(user -> {
+                                    requestHost.setHostId(ResUtil.generateId());
+                                    requestHost.setCreatedDate(createDateTime);
+                                    requestHost.setLastUpdated(createDateTime);
+                                    return hostRepository.save(requestHost)
+                                            .map(createdHost -> new HostCreateUpdateResponse(ResConstants.HOST_CREATE + createdHost.getHostId(), createdHost));
+                                })
+                                .switchIfEmpty(Mono.error(new ResGraphException(ResConstants.USER_NOT_FOUND_WITH_ID + requestHost.getUserId(), HttpStatus.BAD_REQUEST)));
+
                     }
                 });
     }
