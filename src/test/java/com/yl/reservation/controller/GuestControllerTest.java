@@ -3,7 +3,12 @@ package com.yl.reservation.controller;
 import com.yl.reservation.exception.ResGraphException;
 import com.yl.reservation.model.Guest;
 import com.yl.reservation.model.User;
-import com.yl.reservation.service.*;
+import com.yl.reservation.service.guest.GuestCreateUpdateRequest;
+import com.yl.reservation.service.guest.GuestCreateUpdateResponse;
+import com.yl.reservation.service.guest.GuestDetails;
+import com.yl.reservation.service.guest.GuestSearchResponse;
+import com.yl.reservation.service.guest.GuestService;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,159 +24,169 @@ import java.util.List;
 @ExtendWith(MockitoExtension.class)
 public class GuestControllerTest {
 
-    @InjectMocks
-    GuestController guestController;
+        @InjectMocks
+        GuestController guestController;
 
-    @Mock
-    GuestService guestService;
+        @Mock
+        GuestService guestService;
 
-    private final String GUEST_ID1 = "guestId1";
-    private final String GUEST_ID2 = "guestId2";
-    private final String USER_ID1 = "userId1";
-    private final String USER_ID2 = "userId2";
+        private final String GUEST_ID1 = "guestId1";
+        private final String GUEST_ID2 = "guestId2";
+        private final String USER_ID1 = "userId1";
+        private final String USER_ID2 = "userId2";
 
-    @Test
-    void getAllGuests(){
-        Guest guest1 = new Guest();
-        guest1.setGuestId(GUEST_ID1);
-        Guest guest2 = new Guest();
-        guest2.setGuestId(GUEST_ID2);
+        @Test
+        void getAllGuests() {
+                Guest guest1 = new Guest();
+                guest1.setGuestId(GUEST_ID1);
+                Guest guest2 = new Guest();
+                guest2.setGuestId(GUEST_ID2);
 
-        User user1 = new User();
-        user1.setUserId(USER_ID1);
-        User user2 = new User();
-        user2.setUserId(USER_ID2);
+                User user1 = new User();
+                user1.setUserId(USER_ID1);
+                User user2 = new User();
+                user2.setUserId(USER_ID2);
 
-        GuestDetails guestDetails1 = new GuestDetails(guest1, null);
-        GuestDetails guestDetails2 = new GuestDetails(guest2, null);
-        GuestDetails guestDetails3 = new GuestDetails(guest1, user1);
-        GuestDetails guestDetails4 = new GuestDetails(guest2, user2);
+                GuestDetails guestDetails1 = new GuestDetails(guest1, null);
+                GuestDetails guestDetails2 = new GuestDetails(guest2, null);
+                GuestDetails guestDetails3 = new GuestDetails(guest1, user1);
+                GuestDetails guestDetails4 = new GuestDetails(guest2, user2);
 
-        GuestSearchResponse guestSearchResponseNoUserDetails = new GuestSearchResponse("Retrieved all guests", List.of(guestDetails1, guestDetails2));
-        GuestSearchResponse guestSearchResponseWithUserGDetails = new GuestSearchResponse("Retrieved all guests", List.of(guestDetails3, guestDetails4));
+                GuestSearchResponse guestSearchResponseNoUserDetails = new GuestSearchResponse("Retrieved all guests",
+                                List.of(guestDetails1, guestDetails2));
+                GuestSearchResponse guestSearchResponseWithUserGDetails = new GuestSearchResponse(
+                                "Retrieved all guests", List.of(guestDetails3, guestDetails4));
 
-        Mockito.when(guestService.getAllGuests(false)).thenReturn(Mono.just(guestSearchResponseNoUserDetails));
-        Mockito.when(guestService.getAllGuests(true)).thenReturn(Mono.just(guestSearchResponseWithUserGDetails));
+                Mockito.when(guestService.getAllGuests(false)).thenReturn(Mono.just(guestSearchResponseNoUserDetails));
+                Mockito.when(guestService.getAllGuests(true))
+                                .thenReturn(Mono.just(guestSearchResponseWithUserGDetails));
 
-        StepVerifier.create(guestController.getAllGuests(false))
-                .expectNext(guestSearchResponseNoUserDetails)
-                .verifyComplete();
+                StepVerifier.create(guestController.getAllGuests(false))
+                                .expectNext(guestSearchResponseNoUserDetails)
+                                .verifyComplete();
 
-        StepVerifier.create(guestController.getAllGuests(true))
-                .expectNext(guestSearchResponseWithUserGDetails)
-                .verifyComplete();
-    }
+                StepVerifier.create(guestController.getAllGuests(true))
+                                .expectNext(guestSearchResponseWithUserGDetails)
+                                .verifyComplete();
+        }
 
-    @Test
-    void getAllGuestsError(){
-        ResGraphException exception = new ResGraphException("error", HttpStatus.INTERNAL_SERVER_ERROR);
+        @Test
+        void getAllGuestsError() {
+                ResGraphException exception = new ResGraphException("error", HttpStatus.INTERNAL_SERVER_ERROR);
 
-        Mockito.when(guestService.getAllGuests(false)).thenReturn(Mono.error(exception));
+                Mockito.when(guestService.getAllGuests(false)).thenReturn(Mono.error(exception));
 
-        StepVerifier.create(guestController.getAllGuests(false))
-                .expectErrorMatches(error -> error.equals(exception))
-                .verify();
-    }
-    @Test
-    void getGuestById(){
-        Guest guest1 = new Guest();
-        guest1.setGuestId(GUEST_ID1);
+                StepVerifier.create(guestController.getAllGuests(false))
+                                .expectErrorMatches(error -> error.equals(exception))
+                                .verify();
+        }
 
-        User user1 = new User();
-        user1.setUserId(USER_ID1);
+        @Test
+        void getGuestById() {
+                Guest guest1 = new Guest();
+                guest1.setGuestId(GUEST_ID1);
 
-        GuestDetails guestDetails1 = new GuestDetails(guest1, null);
-        GuestDetails guestDetails2 = new GuestDetails(guest1, user1);
+                User user1 = new User();
+                user1.setUserId(USER_ID1);
 
+                GuestDetails guestDetails1 = new GuestDetails(guest1, null);
+                GuestDetails guestDetails2 = new GuestDetails(guest1, user1);
 
-        GuestSearchResponse guestSearchResponseNoUserDetails = new GuestSearchResponse("Retrieved all guests", List.of(guestDetails1));
-        GuestSearchResponse guestSearchResponseWithUserGDetails = new GuestSearchResponse("Retrieved all guests", List.of(guestDetails2));
+                GuestSearchResponse guestSearchResponseNoUserDetails = new GuestSearchResponse("Retrieved all guests",
+                                List.of(guestDetails1));
+                GuestSearchResponse guestSearchResponseWithUserGDetails = new GuestSearchResponse(
+                                "Retrieved all guests", List.of(guestDetails2));
 
-        Mockito.when(guestService.getGuestById(GUEST_ID1, false)).thenReturn(Mono.just(guestSearchResponseNoUserDetails));
-        Mockito.when(guestService.getGuestById(GUEST_ID1, true)).thenReturn(Mono.just(guestSearchResponseWithUserGDetails));
+                Mockito.when(guestService.getGuestById(GUEST_ID1, false))
+                                .thenReturn(Mono.just(guestSearchResponseNoUserDetails));
+                Mockito.when(guestService.getGuestById(GUEST_ID1, true))
+                                .thenReturn(Mono.just(guestSearchResponseWithUserGDetails));
 
-        StepVerifier.create(guestController.getGuestById(GUEST_ID1, false))
-                .expectNext(guestSearchResponseNoUserDetails)
-                .verifyComplete();
+                StepVerifier.create(guestController.getGuestById(GUEST_ID1, false))
+                                .expectNext(guestSearchResponseNoUserDetails)
+                                .verifyComplete();
 
-        StepVerifier.create(guestController.getGuestById(GUEST_ID1, true))
-                .expectNext(guestSearchResponseWithUserGDetails)
-                .verifyComplete();
-    }
+                StepVerifier.create(guestController.getGuestById(GUEST_ID1, true))
+                                .expectNext(guestSearchResponseWithUserGDetails)
+                                .verifyComplete();
+        }
 
-    @Test
-    void getGuestByIdError(){
-        ResGraphException exception = new ResGraphException("error", HttpStatus.INTERNAL_SERVER_ERROR);
+        @Test
+        void getGuestByIdError() {
+                ResGraphException exception = new ResGraphException("error", HttpStatus.INTERNAL_SERVER_ERROR);
 
-        Mockito.when(guestService.getGuestById(GUEST_ID1, false)).thenReturn(Mono.error(exception));
+                Mockito.when(guestService.getGuestById(GUEST_ID1, false)).thenReturn(Mono.error(exception));
 
-        StepVerifier.create(guestController.getGuestById(GUEST_ID1, false))
-                .expectErrorMatches(error -> error.equals(exception))
-                .verify();
-    }
+                StepVerifier.create(guestController.getGuestById(GUEST_ID1, false))
+                                .expectErrorMatches(error -> error.equals(exception))
+                                .verify();
+        }
 
-    @Test
-    void createGuest(){
-        Guest guest = new Guest();
+        @Test
+        void createGuest() {
+                Guest guest = new Guest();
 
-        GuestCreateUpdateRequest request = new GuestCreateUpdateRequest();
-        request.setGuest(guest);
+                GuestCreateUpdateRequest request = new GuestCreateUpdateRequest();
+                request.setGuest(guest);
 
-        GuestCreateUpdateResponse response = new GuestCreateUpdateResponse("Guest created successfully", guest);
+                GuestCreateUpdateResponse response = new GuestCreateUpdateResponse("Guest created successfully", guest);
 
-        Mockito.when(guestService.createGuest(Mockito.any(), Mockito.anyString())).thenReturn(Mono.just(response));
+                Mockito.when(guestService.createGuest(Mockito.any(), Mockito.anyString()))
+                                .thenReturn(Mono.just(response));
 
-        StepVerifier.create(guestController.createGuest(request))
-                .expectNext(response)
-                .verifyComplete();
-    }
+                StepVerifier.create(guestController.createGuest(request))
+                                .expectNext(response)
+                                .verifyComplete();
+        }
 
-    @Test
-    void createGuestError(){
-        Guest guest = new Guest();
+        @Test
+        void createGuestError() {
+                Guest guest = new Guest();
 
-        GuestCreateUpdateRequest request = new GuestCreateUpdateRequest();
-        request.setGuest(guest);
+                GuestCreateUpdateRequest request = new GuestCreateUpdateRequest();
+                request.setGuest(guest);
 
-        ResGraphException exception = new ResGraphException("error", HttpStatus.INTERNAL_SERVER_ERROR);
+                ResGraphException exception = new ResGraphException("error", HttpStatus.INTERNAL_SERVER_ERROR);
 
-        Mockito.when(guestService.createGuest(Mockito.any(), Mockito.anyString())).thenReturn(Mono.error(exception));
+                Mockito.when(guestService.createGuest(Mockito.any(), Mockito.anyString()))
+                                .thenReturn(Mono.error(exception));
 
-        StepVerifier.create(guestController.createGuest(request))
-                .expectErrorMatches(error -> error.equals(exception))
-                .verify();
-    }
+                StepVerifier.create(guestController.createGuest(request))
+                                .expectErrorMatches(error -> error.equals(exception))
+                                .verify();
+        }
 
-    @Test
-    void updateGuest(){
-        Guest guest = new Guest();
+        @Test
+        void updateGuest() {
+                Guest guest = new Guest();
 
-        GuestCreateUpdateRequest request = new GuestCreateUpdateRequest();
-        request.setGuest(guest);
+                GuestCreateUpdateRequest request = new GuestCreateUpdateRequest();
+                request.setGuest(guest);
 
-        GuestCreateUpdateResponse response = new GuestCreateUpdateResponse("Guest created successfully", guest);
+                GuestCreateUpdateResponse response = new GuestCreateUpdateResponse("Guest created successfully", guest);
 
-        Mockito.when(guestService.updateGuest(Mockito.any(), Mockito.anyString())).thenReturn(Mono.just(response));
+                Mockito.when(guestService.updateGuest(Mockito.any(), Mockito.anyString()))
+                                .thenReturn(Mono.just(response));
 
-        StepVerifier.create(guestController.updateGuest(request))
-                .expectNext(response)
-                .verifyComplete();
-    }
+                StepVerifier.create(guestController.updateGuest(request))
+                                .expectNext(response)
+                                .verifyComplete();
+        }
 
-    @Test
-    void updateGuestError() {
-        Guest guest = new Guest();
+        @Test
+        void updateGuestError() {
+                Guest guest = new Guest();
 
-        GuestCreateUpdateRequest request = new GuestCreateUpdateRequest();
-        request.setGuest(guest);
+                GuestCreateUpdateRequest request = new GuestCreateUpdateRequest();
+                request.setGuest(guest);
 
-        ResGraphException exception = new ResGraphException("error", HttpStatus.INTERNAL_SERVER_ERROR);
+                ResGraphException exception = new ResGraphException("error", HttpStatus.INTERNAL_SERVER_ERROR);
 
-        Mockito.when(guestService.updateGuest(Mockito.any(), Mockito.anyString())).thenReturn(Mono.error(exception));
+                Mockito.when(guestService.updateGuest(Mockito.any(), Mockito.anyString()))
+                                .thenReturn(Mono.error(exception));
 
-        StepVerifier.create(guestController.updateGuest(request))
-                .expectErrorMatches(error -> error.equals(exception))
-                .verify();
-    }
+                StepVerifier.create(guestController.updateGuest(request))
+                                .expectErrorMatches(error -> error.equals(exception))
+                                .verify();
+        }
 }
-

@@ -5,6 +5,10 @@ import com.yl.reservation.model.Guest;
 import com.yl.reservation.model.User;
 import com.yl.reservation.repository.GuestRepository;
 import com.yl.reservation.repository.UserRepository;
+import com.yl.reservation.service.guest.GuestCreateUpdateResponse;
+import com.yl.reservation.service.guest.GuestDetails;
+import com.yl.reservation.service.guest.GuestSearchResponse;
+import com.yl.reservation.service.guest.GuestService;
 import com.yl.reservation.util.ResConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,13 +35,13 @@ public class GuestServiceTest {
     @Mock
     UserRepository userRepository;
 
-    private final String GUEST1_ID="guest1Id";
-    private final String GUEST2_ID="guest2Id";
-    private final String USER1_ID="user1Id";
+    private final String GUEST1_ID = "guest1Id";
+    private final String GUEST2_ID = "guest2Id";
+    private final String USER1_ID = "user1Id";
     private final String USER2_ID = "user2Id";
 
     @Test
-    void getAllUsers(){
+    void getAllUsers() {
         Guest guest1 = new Guest();
         guest1.setGuestId(GUEST1_ID);
         guest1.setUserId(USER1_ID);
@@ -56,8 +60,11 @@ public class GuestServiceTest {
         GuestDetails guestDetailsWithoutUserInfo1 = new GuestDetails(guest1, null);
         GuestDetails guestDetailsWithoutUserInfo2 = new GuestDetails(guest2, null);
 
-        GuestSearchResponse guestSearchResponseWithUserInfo = new GuestSearchResponse(ResConstants.GUEST_FIND_ALL_USER_INFO, List.of(guestDetailsWithUserInfo1, guestDetailsWithUserInfo2));
-        GuestSearchResponse guestSearchResponseWithoutUserInfo = new GuestSearchResponse(ResConstants.GUEST_FIND_ALL_NO_USER_INFO, List.of(guestDetailsWithoutUserInfo1, guestDetailsWithoutUserInfo2));
+        GuestSearchResponse guestSearchResponseWithUserInfo = new GuestSearchResponse(
+                ResConstants.GUEST_FIND_ALL_USER_INFO, List.of(guestDetailsWithUserInfo1, guestDetailsWithUserInfo2));
+        GuestSearchResponse guestSearchResponseWithoutUserInfo = new GuestSearchResponse(
+                ResConstants.GUEST_FIND_ALL_NO_USER_INFO,
+                List.of(guestDetailsWithoutUserInfo1, guestDetailsWithoutUserInfo2));
 
         Mockito.when(guestRepository.findAll()).thenReturn(Flux.just(guest1, guest2));
         Mockito.when(userRepository.findByUserId(Mockito.anyString())).thenReturn(Mono.just(user1), Mono.just(user2));
@@ -72,7 +79,7 @@ public class GuestServiceTest {
     }
 
     @Test
-    void getGuestById(){
+    void getGuestById() {
         Guest guest = new Guest();
         guest.setGuestId(GUEST1_ID);
         guest.setUserId(USER1_ID);
@@ -80,27 +87,30 @@ public class GuestServiceTest {
         User user = new User();
         user.setUserId(USER1_ID);
 
-        GuestDetails guestDetailsWithUserInfo = new GuestDetails(guest, user);;
+        GuestDetails guestDetailsWithUserInfo = new GuestDetails(guest, user);
+        ;
 
         GuestDetails guestDetailsWithoutUserInfo = new GuestDetails(guest, null);
 
-        GuestSearchResponse guestSearchResponseWithUserInfo = new GuestSearchResponse(ResConstants.GUEST_FIND + GUEST1_ID + " with user info...", List.of(guestDetailsWithUserInfo));
-        GuestSearchResponse guestSearchResponseWithoutUserInfo = new GuestSearchResponse(ResConstants.GUEST_FIND + GUEST1_ID, List.of(guestDetailsWithoutUserInfo));
+        GuestSearchResponse guestSearchResponseWithUserInfo = new GuestSearchResponse(
+                ResConstants.GUEST_FIND + GUEST1_ID + " with user info...", List.of(guestDetailsWithUserInfo));
+        GuestSearchResponse guestSearchResponseWithoutUserInfo = new GuestSearchResponse(
+                ResConstants.GUEST_FIND + GUEST1_ID, List.of(guestDetailsWithoutUserInfo));
 
         Mockito.when(guestRepository.findByGuestId(Mockito.anyString())).thenReturn(Mono.just(guest));
         Mockito.when(userRepository.findByUserId(Mockito.anyString())).thenReturn(Mono.just(user));
 
-        StepVerifier.create(guestService.getGuestById(GUEST1_ID,true))
+        StepVerifier.create(guestService.getGuestById(GUEST1_ID, true))
                 .expectNext(guestSearchResponseWithUserInfo)
                 .verifyComplete();
 
-        StepVerifier.create(guestService.getGuestById(GUEST1_ID,false))
+        StepVerifier.create(guestService.getGuestById(GUEST1_ID, false))
                 .expectNext(guestSearchResponseWithoutUserInfo)
                 .verifyComplete();
     }
 
     @Test
-    void createNewGuest(){
+    void createNewGuest() {
         Guest requestGuest = new Guest();
         requestGuest.setUserId(USER1_ID);
         requestGuest.setNickName("guestie");
@@ -109,14 +119,15 @@ public class GuestServiceTest {
         user.setUserId(USER1_ID);
 
         Mockito.when(userRepository.findByUserId(USER1_ID)).thenReturn(Mono.just(user));
-        Mockito.when(guestRepository.findByUserIdAndNickName(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.empty());
+        Mockito.when(guestRepository.findByUserIdAndNickName(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(Mono.empty());
         Mockito.when(guestRepository.save(Mockito.any())).thenReturn(Mono.just(requestGuest));
 
         StepVerifier.create(guestService.createGuest(requestGuest, "today")).expectNextCount(1).verifyComplete();
     }
 
     @Test
-    void createNewGuest_existingGuest(){
+    void createNewGuest_existingGuest() {
         Guest requestGuest = new Guest();
         requestGuest.setUserId(USER1_ID);
         requestGuest.setNickName("guestie");
@@ -129,7 +140,8 @@ public class GuestServiceTest {
         User user = new User();
         user.setUserId(USER1_ID);
 
-        Mockito.when(guestRepository.findByUserIdAndNickName(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(existingGuest));
+        Mockito.when(guestRepository.findByUserIdAndNickName(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(Mono.just(existingGuest));
 
         ResGraphException error = new ResGraphException("Guest already exists", HttpStatus.BAD_REQUEST);
 
@@ -144,7 +156,8 @@ public class GuestServiceTest {
         requestGuest.setUserId(USER1_ID);
         requestGuest.setNickName("guestie");
 
-        Mockito.when(guestRepository.findByUserIdAndNickName(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.empty());
+        Mockito.when(guestRepository.findByUserIdAndNickName(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(Mono.empty());
         Mockito.when(userRepository.findByUserId(USER1_ID)).thenReturn(Mono.empty());
 
         ResGraphException error = new ResGraphException("No user with id: " + USER1_ID, HttpStatus.BAD_REQUEST);
@@ -155,7 +168,7 @@ public class GuestServiceTest {
     }
 
     @Test
-    void updateGuest_guestId(){
+    void updateGuest_guestId() {
         Guest requestGuest = new Guest();
         requestGuest.setGuestId(GUEST1_ID);
         requestGuest.setNickName("guestette");
@@ -164,7 +177,8 @@ public class GuestServiceTest {
         existingGuest.setGuestId(GUEST1_ID);
         existingGuest.setNickName("guestie");
 
-        GuestCreateUpdateResponse response = new GuestCreateUpdateResponse(ResConstants.GUEST_UPDATE + GUEST1_ID, requestGuest);
+        GuestCreateUpdateResponse response = new GuestCreateUpdateResponse(ResConstants.GUEST_UPDATE + GUEST1_ID,
+                requestGuest);
 
         Mockito.when(guestRepository.findByGuestId(Mockito.any())).thenReturn(Mono.just(existingGuest));
         Mockito.when(guestRepository.save(Mockito.any())).thenReturn(Mono.just(requestGuest));
@@ -176,12 +190,13 @@ public class GuestServiceTest {
     }
 
     @Test
-    void updateGuest_guestIdNotFound(){
+    void updateGuest_guestIdNotFound() {
         Guest requestGuest = new Guest();
         requestGuest.setGuestId(GUEST1_ID);
         requestGuest.setNickName("guestette");
 
-        ResGraphException error = new ResGraphException(ResConstants.GUEST_NOT_FOUND_WITH_ID + GUEST1_ID, HttpStatus.NOT_FOUND);
+        ResGraphException error = new ResGraphException(ResConstants.GUEST_NOT_FOUND_WITH_ID + GUEST1_ID,
+                HttpStatus.NOT_FOUND);
 
         Mockito.when(guestRepository.findByGuestId(Mockito.any())).thenReturn(Mono.empty());
 
@@ -191,7 +206,7 @@ public class GuestServiceTest {
     }
 
     @Test
-    void updateGuest_userIdNickName(){
+    void updateGuest_userIdNickName() {
         Guest requestGuest = new Guest();
         requestGuest.setUserId(USER1_ID);
         requestGuest.setNickName("guestie");
@@ -202,9 +217,11 @@ public class GuestServiceTest {
         requestGuest.setUserId(USER1_ID);
         existingGuest.setNickName("guestie");
 
-        GuestCreateUpdateResponse response = new GuestCreateUpdateResponse(ResConstants.GUEST_UPDATE + "null", requestGuest);
+        GuestCreateUpdateResponse response = new GuestCreateUpdateResponse(ResConstants.GUEST_UPDATE + "null",
+                requestGuest);
 
-        Mockito.when(guestRepository.findByUserIdAndNickName(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(existingGuest));
+        Mockito.when(guestRepository.findByUserIdAndNickName(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(Mono.just(existingGuest));
         Mockito.when(guestRepository.save(Mockito.any())).thenReturn(Mono.just(requestGuest));
 
         StepVerifier.create(guestService.updateGuest(requestGuest, "today"))
@@ -214,15 +231,17 @@ public class GuestServiceTest {
     }
 
     @Test
-    void updateGuest_userIdNickNameNotFound(){
+    void updateGuest_userIdNickNameNotFound() {
         Guest requestGuest = new Guest();
         requestGuest.setUserId(USER1_ID);
         requestGuest.setNickName("guestie");
         requestGuest.setNotes("notes");
 
-        Mockito.when(guestRepository.findByUserIdAndNickName(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.empty());
+        Mockito.when(guestRepository.findByUserIdAndNickName(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(Mono.empty());
 
-        ResGraphException error = new ResGraphException(ResConstants.GUEST_NOT_FOUND_WITH_ID + GUEST1_ID, HttpStatus.NOT_FOUND);
+        ResGraphException error = new ResGraphException(ResConstants.GUEST_NOT_FOUND_WITH_ID + GUEST1_ID,
+                HttpStatus.NOT_FOUND);
 
         StepVerifier.create(guestService.updateGuest(requestGuest, "today"))
                 .expectErrorMatches(errorResponse -> errorResponse.equals(error))
@@ -231,12 +250,13 @@ public class GuestServiceTest {
     }
 
     @Test
-    void updateGuest_noGuestIdentifying(){
+    void updateGuest_noGuestIdentifying() {
         Guest requestGuest = new Guest();
         requestGuest.setNickName("guestie");
         requestGuest.setNotes("notes");
 
-        ResGraphException expectedError = new ResGraphException(ResConstants.GUEST_NO_IDENTIFYING_ERROR, HttpStatus.BAD_REQUEST);
+        ResGraphException expectedError = new ResGraphException(ResConstants.GUEST_NO_IDENTIFYING_ERROR,
+                HttpStatus.BAD_REQUEST);
 
         StepVerifier.create(guestService.updateGuest(requestGuest, "today"))
                 .expectErrorMatches(error -> error.equals(expectedError))
