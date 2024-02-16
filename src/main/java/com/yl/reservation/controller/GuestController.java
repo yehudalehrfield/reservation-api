@@ -51,7 +51,7 @@ public class GuestController {
     Mono<GuestCreateUpdateResponse> createGuest(@Argument GuestCreateUpdateRequest guestCreateUpdateRequest){
         ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "createGuest");
         String createDateTime = ResUtil.getCurrentDateTimeString();
-        return guestService.createNewGuest(guestCreateUpdateRequest.getGuest(), createDateTime)
+        return guestService.createGuest(guestCreateUpdateRequest.getGuest(), createDateTime)
                 .doOnSuccess(res -> resLogger.setValuesToLogger(HttpStatus.OK, res.toString()))
                 .onErrorResume(error -> {
                     resLogger.setValuesToLogger(HttpStatus.INTERNAL_SERVER_ERROR, null);

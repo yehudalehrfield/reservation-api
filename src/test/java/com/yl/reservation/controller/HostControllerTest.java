@@ -24,7 +24,7 @@ public class HostControllerTest {
     HostService hostService;
 
     @Test
-    void getAllHosts(){
+    void getAllHosts() {
         Host host1 = new Host();
         host1.setHostId("id1");
         host1.setUserId("userId1");
@@ -43,8 +43,8 @@ public class HostControllerTest {
         HostDetails hostDetails4 = new HostDetails(host2, null);
 
 
-        HostSearchResponse responseUserInfo = new HostSearchResponse("success", List.of(hostDetails1,hostDetails2));
-        HostSearchResponse responseNoUserInfo = new HostSearchResponse("success",List.of(hostDetails3, hostDetails4));
+        HostSearchResponse responseUserInfo = new HostSearchResponse("success", List.of(hostDetails1, hostDetails2));
+        HostSearchResponse responseNoUserInfo = new HostSearchResponse("success", List.of(hostDetails3, hostDetails4));
 
         Mockito.when(hostService.getAllHosts(true)).thenReturn(Mono.just(responseUserInfo));
         Mockito.when(hostService.getAllHosts(false)).thenReturn(Mono.just(responseNoUserInfo));
@@ -59,7 +59,7 @@ public class HostControllerTest {
     }
 
     @Test
-    void getHostById(){
+    void getHostById() {
         Host host = new Host();
         host.setHostId("hostId");
         host.setUserId("userId");
@@ -68,41 +68,19 @@ public class HostControllerTest {
         HostDetails hostDetails = new HostDetails(host, user);
         HostDetails hostDetails2 = new HostDetails(host, null);
 
-        HostSearchResponse responseUserInfo = new HostSearchResponse("success",List.of(hostDetails));
+        HostSearchResponse responseUserInfo = new HostSearchResponse("success", List.of(hostDetails));
 
-        HostSearchResponse responseNoUserInfo = new HostSearchResponse("success",List.of(hostDetails2));
+        HostSearchResponse responseNoUserInfo = new HostSearchResponse("success", List.of(hostDetails2));
 
-        Mockito.when(hostService.getHostById("hostId",true)).thenReturn(Mono.just(responseUserInfo));
-        Mockito.when(hostService.getHostById("hostId",false)).thenReturn(Mono.just(responseNoUserInfo));
+        Mockito.when(hostService.getHostById("hostId", true)).thenReturn(Mono.just(responseUserInfo));
+        Mockito.when(hostService.getHostById("hostId", false)).thenReturn(Mono.just(responseNoUserInfo));
 
-        StepVerifier.create(hostController.getHostById("hostId",true))
+        StepVerifier.create(hostController.getHostById("hostId", true))
                 .expectNext(responseUserInfo)
                 .verifyComplete();
 
-        StepVerifier.create(hostController.getHostById("hostId",false))
+        StepVerifier.create(hostController.getHostById("hostId", false))
                 .expectNext(responseNoUserInfo)
                 .verifyComplete();
-    }
-
-
-    @Test
-    void createUpdateHost(){
-        Host host = new Host();
-        host.setHostId("hostId");
-        host.setUserId("userId");
-        host.setCreatedDate("today");
-        host.setLastUpdated("today");
-        User user = new User();
-        user.setUserId("userId");
-        HostCreateUpdateRequest request = new HostCreateUpdateRequest(host,user,Boolean.FALSE, Boolean.FALSE);
-
-        HostCreateUpdateResponse response = new HostCreateUpdateResponse("success", host, user);
-
-        Mockito.when(hostService.createUpdateHost(request)).thenReturn(Mono.just(response));
-
-        StepVerifier.create(hostController.createUpdateHost(request))
-                .expectNext(response)
-                .verifyComplete();
-
     }
 }

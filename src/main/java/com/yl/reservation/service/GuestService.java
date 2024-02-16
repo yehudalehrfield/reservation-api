@@ -89,21 +89,24 @@ public class GuestService {
                 });
     }
 
-    public Mono<GuestCreateUpdateResponse> createNewGuest(Guest requestGuest, String createDateTime) {
+    public Mono<GuestCreateUpdateResponse> createGuest(Guest requestGuest, String createDateTime) {
         RequestValidatorService.validateCreateGuestInfo(requestGuest);
         return validateNotExistingGuest(requestGuest)
                 .flatMap(res -> {
                     if (res.equals(Boolean.TRUE))
-                        throw new ResGraphException("Guest already exists", HttpStatus.BAD_REQUEST);
+                        throw new ResGraphException(ResConstants.GUEST_ALREADY_EXISTS_ERROR, HttpStatus.BAD_REQUEST);
                     else {
-                        requestGuest.setGuestId(ResUtil.generateId());
-                        requestGuest.setCreatedDate(createDateTime);
-                        requestGuest.setLastUpdated(createDateTime);
-                        return guestRepository.save(requestGuest).map(createdGuest -> new GuestCreateUpdateResponse(
-                                ResConstants.GUEST_CREATE + createdGuest.getGuestId(), createdGuest));
+                        return userRepository.findByUserId(requestGuest.getUserId())
+                                .flatMap(user -> {
+                                    requestGuest.setGuestId(ResUtil.generateId());
+                                    requestGuest.setCreatedDate(createDateTime);
+                                    requestGuest.setLastUpdated(createDateTime);
+                                    return guestRepository.save(requestGuest).map(createdGuest -> new GuestCreateUpdateResponse(
+                                            ResConstants.GUEST_CREATE + createdGuest.getGuestId(), createdGuest));
+                                })
+                                .switchIfEmpty(Mono.error(new ResGraphException(ResConstants.USER_NOT_FOUND_WITH_ID + requestGuest.getUserId(), HttpStatus.BAD_REQUEST)));
                     }
                 });
-
     }
 
     private Mono<Boolean> validateNotExistingGuest(Guest guest) {
@@ -115,7 +118,7 @@ public class GuestService {
     public Mono<GuestCreateUpdateResponse> updateGuest(Guest requestGuest, String updateDateTime) {
         // todo: validation?
         // 1. nickname must be unique to this user
-        // 2. numAdults and numChildren must be greater than 0
+//        RequestValidatorService.validateUpdateGuest(requestGuest);
         if (requestGuest.getGuestId() != null) {
             String guestIdToSearch = requestGuest.getUserId();
             return guestRepository.findByGuestId(guestIdToSearch)
@@ -136,9 +139,9 @@ public class GuestService {
                                 ResConstants.GUEST_UPDATE + guest.getGuestId(), guest));
                     })
                     .switchIfEmpty(Mono.error(new ResGraphException(
-                            ResConstants.GUEST_NOT_FOUND_WITH_ID + requestGuest.getGuestId(), HttpStatus.NOT_FOUND)));
+                            String.format(ResConstants.GUEST_NOT_FOUND_USER_ID_NICKNAME, requestGuest.getUserId(), requestGuest.getNickName()), HttpStatus.NOT_FOUND)));
         } else {
-            throw new ResGraphException(ResConstants.GUEST_NO_IDENTIFYING_ERROR, HttpStatus.BAD_REQUEST);
+            return Mono.error(new ResGraphException(ResConstants.GUEST_NO_IDENTIFYING_ERROR, HttpStatus.BAD_REQUEST));
         }
     }
 
