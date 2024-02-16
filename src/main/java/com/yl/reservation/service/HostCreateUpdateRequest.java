@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class HostCreateUpdateRequest {
     private Host host;
+    private Boolean isAddressUpdate;
 }

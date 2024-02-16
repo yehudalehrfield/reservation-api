@@ -29,7 +29,7 @@ public class UserService {
 
     public Mono<UserResponse> getUserById(String userId) {
         return userRepository.findByUserId(userId)
-                .map(user -> new UserResponse("Retrieved user " + user.getUserId(), List.of(user)))
+                .map(user -> new UserResponse(ResConstants.USER_FIND + user.getUserId(), List.of(user)))
                 .switchIfEmpty(Mono.error(new ResGraphException("No user " + userId, HttpStatus.NOT_FOUND)));
     }
 
@@ -38,7 +38,7 @@ public class UserService {
         return validateNotExistingUser(requestUser)
                 .flatMap(res -> {
                     if (res.equals(Boolean.TRUE))
-                        throw new ResException("User already exists", HttpStatus.BAD_REQUEST);
+                        return Mono.error(new ResGraphException(ResConstants.USER_ALREADY_EXISTS_ERROR, HttpStatus.BAD_REQUEST));
                     else {
                         requestUser.setUserId(ResUtil.generateId());
                         requestUser.setCreatedDate(createDateTime);

@@ -8,7 +8,8 @@ type Query {
 }
 
 type Mutation{
-    createUpdateHost(hostCreateUpdateRequest: HostCreateUpdateRequest): HostResponse
+    createHost(hostCreateUpdateRequest: HostCreateUpdateRequest): HostResponse
+    updateHost(hostCreateUpdateRequest: HostCreateUpdateRequest): HostResponse
     createUser(userCreateUpdateRequest: UserCreateUpdateRequest): UserResponse
     updateUser(userCreateUpdateRequest: UserCreateUpdateRequest): UserResponse
     createGuest(guestCreateUpdateRequest: GuestCreateUpdateRequest): GuestResponse
@@ -97,9 +98,7 @@ input UserCreateUpdateRequest{
 
 input HostCreateUpdateRequest{
     isAddressUpdate: Boolean = false
-    isUserUpdate: Boolean = false
     host: HostInput
-    user: UserInput
 }
 
 input GuestCreateUpdateRequest{

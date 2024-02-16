@@ -90,12 +90,12 @@ public class HostService {
                 });
     }
 
-    public Mono<HostCreateUpdateResponse> createHost(Host requestHost, String createDateTime){
+    public Mono<HostCreateUpdateResponse> createHost(Host requestHost, String createDateTime) {
         RequestValidatorService.validateCreateHostInfo(requestHost);
         return validateNotExistingHost(requestHost)
                 .flatMap(res -> {
                     if (res.equals(Boolean.TRUE)) {
-                        throw new ResException("Host already exists", HttpStatus.BAD_REQUEST);
+                        return Mono.error(new ResGraphException(ResConstants.HOST_ALREADY_EXISTS_ERROR, HttpStatus.BAD_REQUEST));
                     } else {
                         requestHost.setHostId(ResUtil.generateId());
                         requestHost.setCreatedDate(createDateTime);
@@ -106,14 +106,14 @@ public class HostService {
                 });
     }
 
-    private Mono<Boolean> validateNotExistingHost(Host host){
+    private Mono<Boolean> validateNotExistingHost(Host host) {
         return hostRepository.findByUserIdAndAddress(host.getUserId(), host.getAddress())
                 .map(res -> true)
                 .switchIfEmpty(Mono.just(false));
     }
 
-    public Mono<HostCreateUpdateResponse> updateHost(Host requestHost, String updateDateTime){
-        RequestValidatorService.validateUpdateHostInfo(requestHost);
+    public Mono<HostCreateUpdateResponse> updateHost(Host requestHost, boolean isAddressUpdate, String updateDateTime) {
+        RequestValidatorService.validateUpdateHostInfo(requestHost, isAddressUpdate);
         if (requestHost.getHostId() != null) {
             String hostIdtoSearch = requestHost.getHostId();
             return hostRepository.findByHostId(hostIdtoSearch)

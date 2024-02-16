@@ -94,7 +94,7 @@ public class GuestService {
         return validateNotExistingGuest(requestGuest)
                 .flatMap(res -> {
                     if (res.equals(Boolean.TRUE))
-                        throw new ResGraphException("Guest already exists", HttpStatus.BAD_REQUEST);
+                        throw new ResGraphException(ResConstants.GUEST_ALREADY_EXISTS_ERROR, HttpStatus.BAD_REQUEST);
                     else {
                         return userRepository.findByUserId(requestGuest.getUserId())
                                 .flatMap(user -> {
@@ -118,7 +118,7 @@ public class GuestService {
     public Mono<GuestCreateUpdateResponse> updateGuest(Guest requestGuest, String updateDateTime) {
         // todo: validation?
         // 1. nickname must be unique to this user
-        // 2. numAdults and numChildren must be greater than 0
+//        RequestValidatorService.validateUpdateGuest(requestGuest);
         if (requestGuest.getGuestId() != null) {
             String guestIdToSearch = requestGuest.getUserId();
             return guestRepository.findByGuestId(guestIdToSearch)

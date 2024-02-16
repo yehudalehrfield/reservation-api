@@ -103,8 +103,11 @@ public class HostServiceTest {
     void updateHostGivenHostId() {
         HostCreateUpdateRequest request = new HostCreateUpdateRequest();
 
+        Address hostAddress = new Address("123 Main St.", null, "New York", State.NY, "10001");
+
         Host requestHost = new Host();
         requestHost.setHostId("hostId1");
+        requestHost.setAddress(hostAddress);
         requestHost.setNotes("new notes");
 
         request.setHost(requestHost);
@@ -117,7 +120,7 @@ public class HostServiceTest {
         Mockito.when(hostRepository.findByHostId(Mockito.anyString())).thenReturn(Mono.just(existingHost));
         Mockito.when(hostRepository.save(Mockito.any())).thenReturn(Mono.just(requestHost));
 
-        StepVerifier.create(hostService.updateHost(request.getHost(), "today"))
+        StepVerifier.create(hostService.updateHost(request.getHost(), true, "today"))
                 .expectNext(response)
                 .verifyComplete();
     }
@@ -137,11 +140,40 @@ public class HostServiceTest {
         request.setHost(requestHost);
 
         Host existingHost = new Host();
+        existingHost.setHostId("hostId1");
+        existingHost.setAddress(hostAddress);
+
+        HostCreateUpdateResponse response = new HostCreateUpdateResponse("Updated host null", requestHost);
+
+        Mockito.when(hostRepository.findByUserIdAndAddress(Mockito.anyString(), Mockito.any())).thenReturn(Mono.just(existingHost));
+        Mockito.when(hostRepository.save(Mockito.any())).thenReturn(Mono.just(requestHost));
+
+        StepVerifier.create(hostService.updateHost(requestHost, false,"today"))
+                .expectNext(response)
+                .verifyComplete();
+
+    }
+
+    @Test
+    void updateHostGivenUserIdAndAddress_AddressUpdateError() {
+        HostCreateUpdateRequest request = new HostCreateUpdateRequest();
+
+        Host requestHost = new Host();
+
+        Address hostAddress = new Address("123 Main St.", null, "New York", State.NY, "10001");
+
+        requestHost.setUserId("userId1");
+        requestHost.setAddress(hostAddress);
+        requestHost.setNotes("new notes");
+
+        request.setHost(requestHost);
+
+        Host existingHost = new Host();
         existingHost.setAddress(hostAddress);
 
         ResGraphException expectedError = new ResGraphException(ResConstants.HOST_ID_REQUIRED_FOR_ADDRESS_UPDATE, HttpStatus.BAD_REQUEST);
 
-        ResGraphException actualError = Assertions.assertThrows(ResGraphException.class, () -> hostService.updateHost(request.getHost(), "today"));
+        ResGraphException actualError = Assertions.assertThrows(ResGraphException.class, () -> hostService.updateHost(request.getHost(), true,"today"));
         Assertions.assertEquals(expectedError, actualError);
 
     }
@@ -156,20 +188,49 @@ public class HostServiceTest {
 
         requestHost.setUserId("userId1");
         requestHost.setAddress(hostAddress);
-        requestHost.setNotes("new notes");
+
+        Host existingHost = new Host();
+        existingHost.setHostId("hostId1");
+        existingHost.setUserId("userId1");
+        existingHost.setAddress(hostAddress);
 
         request.setHost(requestHost);
 
         Mockito.when(hostRepository.findByUserIdAndAddress(Mockito.anyString(), Mockito.any()))
-                .thenReturn(Mono.empty());
-        Mockito.when(hostRepository.save(Mockito.any())).thenReturn(Mono.just(requestHost));
+                .thenReturn(Mono.just(existingHost));
 
         StepVerifier.create(hostService.createHost(request.getHost(), "today"))
-                .expectNextCount(1)
-                .verifyComplete();
+                .expectError()
+                .verify();
 
     }
 
+    @Test
+    void createHost_hostAlreadyExistsError() {
+        HostCreateUpdateRequest request = new HostCreateUpdateRequest();
 
-    // todo: error tests
+        Host requestHost = new Host();
+
+        Address hostAddress = new Address("123 Main St.", null, "New York", State.NY, "10001");
+
+        requestHost.setUserId("userId1");
+        requestHost.setAddress(hostAddress);
+
+        request.setHost(requestHost);
+
+        Host existingHost = new Host();
+        existingHost.setHostId("hostId1");
+        existingHost.setUserId("userId1");
+        existingHost.setAddress(hostAddress);
+
+        Mockito.when(hostRepository.findByUserIdAndAddress(Mockito.any(), Mockito.any())).thenReturn(Mono.just(existingHost));
+
+        ResGraphException expectedError = new ResGraphException(ResConstants.HOST_ALREADY_EXISTS_ERROR, HttpStatus.BAD_REQUEST);
+
+        StepVerifier.create(hostService.createHost(request.getHost(), "today"))
+                .expectErrorMatches(error -> error.equals(expectedError))
+                .verify();
+
+    }
+
 }

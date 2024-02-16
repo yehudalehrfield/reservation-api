@@ -63,7 +63,7 @@ public class HostController {
      Mono<HostCreateUpdateResponse> updateHost(@Argument HostCreateUpdateRequest hostCreateUpdateRequest){
          ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "updateHost");
          String updateDateTime = ResUtil.getCurrentDateTimeString();
-         return hostService.updateHost(hostCreateUpdateRequest.getHost(), updateDateTime)
+         return hostService.updateHost(hostCreateUpdateRequest.getHost(), hostCreateUpdateRequest.getIsAddressUpdate(), updateDateTime)
                  .doOnSuccess(res -> resLogger.setValuesToLogger(HttpStatus.OK, res.toString()))
                  .onErrorResume(error -> {
                      resLogger.setValuesToLogger(HttpStatus.INTERNAL_SERVER_ERROR, null);
