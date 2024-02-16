@@ -134,7 +134,7 @@ public class HostService {
                     })
                     .switchIfEmpty(Mono.error(new ResGraphException(String.format(ResConstants.HOST_NOT_FOUND_USER_ID_ADDRESS, requestHost.getUserId(), requestHost.getAddress()), HttpStatus.BAD_REQUEST)));
         } else {
-            throw new ResGraphException(ResConstants.HOST_NO_IDENTIFYING_ERROR, HttpStatus.BAD_REQUEST);
+            return Mono.error(new ResGraphException(ResConstants.HOST_NO_IDENTIFYING_ERROR, HttpStatus.BAD_REQUEST));
         }
     }
 

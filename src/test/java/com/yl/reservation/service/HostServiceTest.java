@@ -179,6 +179,19 @@ public class HostServiceTest {
     }
 
     @Test
+    void updateGuest_noGuestIdentifying(){
+        Host requestHost = new Host();
+        requestHost.setUserId("userId1");
+
+        ResGraphException expectedError = new ResGraphException(ResConstants.HOST_NO_IDENTIFYING_ERROR, HttpStatus.BAD_REQUEST);
+
+        StepVerifier.create(hostService.updateHost(requestHost,false, "today"))
+                .expectErrorMatches(error -> error.equals(expectedError))
+                .verify();
+
+    }
+
+    @Test
     void createHost() {
         HostCreateUpdateRequest request = new HostCreateUpdateRequest();
 

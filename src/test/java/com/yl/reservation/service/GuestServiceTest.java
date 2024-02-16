@@ -236,11 +236,10 @@ public class GuestServiceTest {
         requestGuest.setNickName("guestie");
         requestGuest.setNotes("notes");
 
-        ResGraphException error = new ResGraphException(ResConstants.GUEST_NO_IDENTIFYING_ERROR, HttpStatus.BAD_REQUEST);
+        ResGraphException expectedError = new ResGraphException(ResConstants.GUEST_NO_IDENTIFYING_ERROR, HttpStatus.BAD_REQUEST);
 
         StepVerifier.create(guestService.updateGuest(requestGuest, "today"))
-//                .expectErrorMatches(errorResponse -> errorResponse.equals(error))
-                .expectError()
+                .expectErrorMatches(error -> error.equals(expectedError))
                 .verify();
 
     }
