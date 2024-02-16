@@ -40,6 +40,7 @@ public class GuestServiceTest {
     private final String USER1_ID = "user1Id";
     private final String USER2_ID = "user2Id";
 
+    @SuppressWarnings("unchecked")
     @Test
     void getAllUsers() {
         Guest guest1 = new Guest();

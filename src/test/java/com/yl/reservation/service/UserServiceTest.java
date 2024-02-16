@@ -6,6 +6,9 @@ import com.yl.reservation.model.Email;
 import com.yl.reservation.model.Phone;
 import com.yl.reservation.model.User;
 import com.yl.reservation.repository.UserRepository;
+import com.yl.reservation.service.user.UserResponse;
+import com.yl.reservation.service.user.UserService;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,7 +22,6 @@ import reactor.test.StepVerifier;
 
 import java.util.List;
 
-
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
@@ -31,8 +33,9 @@ public class UserServiceTest {
 
     private String userId1 = "userId1";
     private String userId2 = "userId2";
+
     @Test
-    void getAllUsers(){
+    void getAllUsers() {
         User user1 = new User();
         user1.setUserId(userId1);
         User user2 = new User();
@@ -48,7 +51,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void getAllUsers_notFound(){
+    void getAllUsers_notFound() {
         User user1 = new User();
         user1.setUserId(userId1);
         User user2 = new User();
@@ -57,12 +60,13 @@ public class UserServiceTest {
         Mockito.when(userRepository.findAll()).thenReturn(Flux.empty());
 
         StepVerifier.create(userService.getAllUsers())
-                .expectErrorMatches(error -> error.equals(new ResGraphException("No users found", HttpStatus.NOT_FOUND)))
+                .expectErrorMatches(
+                        error -> error.equals(new ResGraphException("No users found", HttpStatus.NOT_FOUND)))
                 .verify();
     }
 
     @Test
-    void getUserById(){
+    void getUserById() {
         User user1 = new User();
         user1.setUserId(userId1);
 
@@ -74,64 +78,68 @@ public class UserServiceTest {
     }
 
     @Test
-    void getUserById_notFound(){
+    void getUserById_notFound() {
         Mockito.when(userRepository.findByUserId(userId1)).thenReturn(Mono.empty());
 
         StepVerifier.create(userService.getUserById(userId1))
-                .expectErrorMatches(error -> error.equals(new ResGraphException("No user userId1", HttpStatus.NOT_FOUND)))
+                .expectErrorMatches(
+                        error -> error.equals(new ResGraphException("No user userId1", HttpStatus.NOT_FOUND)))
                 .verify();
     }
 
     @Test
-    void createNewUser_phoneAsPrimary(){
+    void createNewUser_phoneAsPrimary() {
         User user = new User();
         user.setFirstName("first");
         user.setLastName("last");
-        user.setPhone(List.of(new Phone(Phone.PhoneType.HOME, "1234567890",true)));
+        user.setPhone(List.of(new Phone(Phone.PhoneType.HOME, "1234567890", true)));
         user.setPrimaryContactMethod(ContactMethod.PHONE);
 
         Mockito.when(userRepository.findByLastNameAndPrimaryPhone("last", "1234567890")).thenReturn(Mono.empty());
         Mockito.when(userRepository.save(Mockito.any())).thenReturn(Mono.just(user));
 
-        StepVerifier.create(userService.createNewUser(user,"today"))
+        StepVerifier.create(userService.createNewUser(user, "today"))
                 .expectNextCount(1)
                 .verifyComplete();
     }
 
     @Test
-    void createNewUser_emailAsPrimary(){
+    void createNewUser_emailAsPrimary() {
         User user = new User();
         user.setFirstName("first");
         user.setLastName("last");
         user.setPrimaryContactMethod(ContactMethod.EMAIL);
         user.setEmail(List.of(new Email(Email.EmailType.PERSONAL, "email@email.com", true)));
 
-        Mockito.when(userRepository.findByLastNameAndPrimaryEmail(Mockito.anyString(),Mockito.anyString())).thenReturn(Mono.empty());
+        Mockito.when(userRepository.findByLastNameAndPrimaryEmail(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(Mono.empty());
         Mockito.when(userRepository.save(Mockito.any())).thenReturn(Mono.just(user));
 
-        StepVerifier.create(userService.createNewUser(user,"today"))
+        StepVerifier.create(userService.createNewUser(user, "today"))
                 .expectNextCount(1)
                 .verifyComplete();
     }
 
-//    @Test
-//    void createNewUser_userAlreadyExists(){
-//        User user = new User();
-//        user.setFirstName("first");
-//        user.setLastName("last");
-//        user.setPhone(List.of(new Phone(Phone.PhoneType.HOME, "1234567890",true)));
-//        user.setPrimaryContactMethod(ContactMethod.PHONE);
-//
-//        Mockito.when(userRepository.findByLastNameAndPrimaryPhone("last", "1234567890")).thenReturn(Mono.just(user));
-//
-//        StepVerifier.create(userService.createNewUser(user,"today"))
-//                .expectErrorMatches(error -> error.equals(new ResGraphException("User already exists", HttpStatus.BAD_REQUEST)))
-//                .verify();
-//
-//    }
+    // @Test
+    // void createNewUser_userAlreadyExists(){
+    // User user = new User();
+    // user.setFirstName("first");
+    // user.setLastName("last");
+    // user.setPhone(List.of(new Phone(Phone.PhoneType.HOME, "1234567890",true)));
+    // user.setPrimaryContactMethod(ContactMethod.PHONE);
+    //
+    // Mockito.when(userRepository.findByLastNameAndPrimaryPhone("last",
+    // "1234567890")).thenReturn(Mono.just(user));
+    //
+    // StepVerifier.create(userService.createNewUser(user,"today"))
+    // .expectErrorMatches(error -> error.equals(new ResGraphException("User already
+    // exists", HttpStatus.BAD_REQUEST)))
+    // .verify();
+    //
+    // }
 
     @Test
-    void updateUser_byUserId(){
+    void updateUser_byUserId() {
         User user1 = new User();
         user1.setUserId(userId1);
         user1.setPrimaryContactMethod(ContactMethod.PHONE);
@@ -149,7 +157,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateUser_byLastNameAndPhoneAsPrimary(){
+    void updateUser_byLastNameAndPhoneAsPrimary() {
         User user1 = new User();
         user1.setLastName("last");
         user1.setPrimaryContactMethod(ContactMethod.PHONE);
@@ -160,7 +168,8 @@ public class UserServiceTest {
         existingUser.setPrimaryContactMethod(ContactMethod.PHONE);
         existingUser.setPhone(List.of(new Phone(Phone.PhoneType.HOME, "1234567890", true)));
 
-        Mockito.when(userRepository.findByLastNameAndPrimaryPhone(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(existingUser));
+        Mockito.when(userRepository.findByLastNameAndPrimaryPhone(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(Mono.just(existingUser));
         Mockito.when(userRepository.save(Mockito.any())).thenReturn(Mono.just(user1));
 
         UserResponse response = new UserResponse("Updated user null", List.of(user1));
@@ -170,7 +179,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateUser_byLastNameAndEmailAsPrimary(){
+    void updateUser_byLastNameAndEmailAsPrimary() {
         User user1 = new User();
         user1.setLastName("last");
         user1.setPrimaryContactMethod(ContactMethod.EMAIL);
@@ -181,7 +190,8 @@ public class UserServiceTest {
         existingUser.setPrimaryContactMethod(ContactMethod.PHONE);
         existingUser.setEmail(List.of(new Email(Email.EmailType.PERSONAL, "email@email.com", true)));
 
-        Mockito.when(userRepository.findByLastNameAndPrimaryEmail(Mockito.anyString(), Mockito.anyString() )).thenReturn(Mono.just(existingUser));
+        Mockito.when(userRepository.findByLastNameAndPrimaryEmail(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(Mono.just(existingUser));
         Mockito.when(userRepository.save(Mockito.any())).thenReturn(Mono.just(user1));
 
         UserResponse response = new UserResponse("Updated user null", List.of(user1));
@@ -190,6 +200,5 @@ public class UserServiceTest {
                 .verifyComplete();
     }
 
-//
+    //
 }
-

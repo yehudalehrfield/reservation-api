@@ -1,9 +1,9 @@
 package com.yl.reservation.controller;
 
 import com.yl.reservation.exception.ResGraphException;
-import com.yl.reservation.service.UserCreateUpdateRequest;
-import com.yl.reservation.service.UserResponse;
-import com.yl.reservation.service.UserService;
+import com.yl.reservation.service.user.UserCreateUpdateRequest;
+import com.yl.reservation.service.user.UserResponse;
+import com.yl.reservation.service.user.UserService;
 import com.yl.reservation.util.ResLogger;
 import com.yl.reservation.util.ResUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,16 +24,16 @@ public class UserController {
     @QueryMapping
     Mono<UserResponse> getAllUsers() {
         ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "getAllUsers");
-//        ServletRequestAttributes servletRequestAttributes =
-//                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-//        HttpServletRequest request = null;
-//        if (servletRequestAttributes != null) {
-//            request = servletRequestAttributes.getRequest();
-//        }
+        // ServletRequestAttributes servletRequestAttributes =
+        // (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        // HttpServletRequest request = null;
+        // if (servletRequestAttributes != null) {
+        // request = servletRequestAttributes.getRequest();
+        // }
         resLogger.setStartTime(System.currentTimeMillis());
         resLogger.setRequestMethod(HttpMethod.POST);
-//        if (request != null)
-//            resLogger.getHeaders(request);
+        // if (request != null)
+        // resLogger.getHeaders(request);
         resLogger.setQuery("getAllUsers");
         return userService.getAllUsers()
                 .switchIfEmpty(returnNotFound(resLogger, "No users found"))
@@ -84,7 +84,7 @@ public class UserController {
                 .cache();
     }
 
-    private static Mono<UserResponse> returnNotFound(ResLogger resLogger, String message){
+    private static Mono<UserResponse> returnNotFound(ResLogger resLogger, String message) {
         resLogger.setValuesToLogger(HttpStatus.NOT_FOUND, null);
         return Mono.error(new ResGraphException(message, HttpStatus.NOT_FOUND));
     }

@@ -1,9 +1,10 @@
-package com.yl.reservation.service;
+package com.yl.reservation.service.guest;
 
 import com.yl.reservation.exception.ResGraphException;
 import com.yl.reservation.model.*;
 import com.yl.reservation.repository.GuestRepository;
 import com.yl.reservation.repository.UserRepository;
+import com.yl.reservation.util.CreateUpdateMapper;
 import com.yl.reservation.util.RequestValidatorService;
 import com.yl.reservation.util.ResConstants;
 import com.yl.reservation.util.ResUtil;
@@ -101,10 +102,14 @@ public class GuestService {
                                     requestGuest.setGuestId(ResUtil.generateId());
                                     requestGuest.setCreatedDate(createDateTime);
                                     requestGuest.setLastUpdated(createDateTime);
-                                    return guestRepository.save(requestGuest).map(createdGuest -> new GuestCreateUpdateResponse(
-                                            ResConstants.GUEST_CREATE + createdGuest.getGuestId(), createdGuest));
+                                    return guestRepository.save(requestGuest)
+                                            .map(createdGuest -> new GuestCreateUpdateResponse(
+                                                    ResConstants.GUEST_CREATE + createdGuest.getGuestId(),
+                                                    createdGuest));
                                 })
-                                .switchIfEmpty(Mono.error(new ResGraphException(ResConstants.USER_NOT_FOUND_WITH_ID + requestGuest.getUserId(), HttpStatus.BAD_REQUEST)));
+                                .switchIfEmpty(Mono.error(new ResGraphException(
+                                        ResConstants.USER_NOT_FOUND_WITH_ID + requestGuest.getUserId(),
+                                        HttpStatus.BAD_REQUEST)));
                     }
                 });
     }
@@ -118,7 +123,7 @@ public class GuestService {
     public Mono<GuestCreateUpdateResponse> updateGuest(Guest requestGuest, String updateDateTime) {
         // todo: validation?
         // 1. nickname must be unique to this user
-//        RequestValidatorService.validateUpdateGuest(requestGuest);
+        // RequestValidatorService.validateUpdateGuest(requestGuest);
         if (requestGuest.getGuestId() != null) {
             String guestIdToSearch = requestGuest.getUserId();
             return guestRepository.findByGuestId(guestIdToSearch)
@@ -139,7 +144,9 @@ public class GuestService {
                                 ResConstants.GUEST_UPDATE + guest.getGuestId(), guest));
                     })
                     .switchIfEmpty(Mono.error(new ResGraphException(
-                            String.format(ResConstants.GUEST_NOT_FOUND_USER_ID_NICKNAME, requestGuest.getUserId(), requestGuest.getNickName()), HttpStatus.NOT_FOUND)));
+                            String.format(ResConstants.GUEST_NOT_FOUND_USER_ID_NICKNAME, requestGuest.getUserId(),
+                                    requestGuest.getNickName()),
+                            HttpStatus.NOT_FOUND)));
         } else {
             return Mono.error(new ResGraphException(ResConstants.GUEST_NO_IDENTIFYING_ERROR, HttpStatus.BAD_REQUEST));
         }

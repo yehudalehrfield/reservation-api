@@ -2,9 +2,10 @@ package com.yl.reservation.controller;
 
 import com.yl.reservation.exception.ResGraphException;
 import com.yl.reservation.model.User;
-import com.yl.reservation.service.UserCreateUpdateRequest;
-import com.yl.reservation.service.UserResponse;
-import com.yl.reservation.service.UserService;
+import com.yl.reservation.service.user.UserCreateUpdateRequest;
+import com.yl.reservation.service.user.UserResponse;
+import com.yl.reservation.service.user.UserService;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -1,4 +1,4 @@
-package com.yl.reservation.service;
+package com.yl.reservation.service.user;
 
 import com.yl.reservation.model.User;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.yl.reservation.service;
+package com.yl.reservation.service.host;
 
 import com.yl.reservation.model.Host;
 import com.yl.reservation.model.User;

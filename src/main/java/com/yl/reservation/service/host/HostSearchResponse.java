@@ -1,4 +1,4 @@
-package com.yl.reservation.service;
+package com.yl.reservation.service.host;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.yl.reservation.service;
+package com.yl.reservation.util;
 
 import com.yl.reservation.exception.ResGraphException;
 import com.yl.reservation.exception.ResException;
@@ -106,7 +106,8 @@ public class CreateUpdateMapper {
             return true;
         if (requestHost.getFullBath() != null && !requestHost.getFullBath().equals(updatedHost.getFullBath()))
             return true;
-        if (requestHost.getPrivateEntrance() != null && !requestHost.getPrivateEntrance().equals(updatedHost.getPrivateEntrance()))
+        if (requestHost.getPrivateEntrance() != null
+                && !requestHost.getPrivateEntrance().equals(updatedHost.getPrivateEntrance()))
             return true;
         return (requestHost.getNotes() != null && !requestHost.getNotes().equals(updatedHost.getNotes()));
     }
