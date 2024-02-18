@@ -24,6 +24,7 @@ public class HostService {
     @Autowired
     UserRepository userRepository;
 
+    // todo: handle empty response
     public Mono<HostSearchResponse> getAllHosts(boolean includeUserInfo) {
         HostSearchResponse response = new HostSearchResponse();
         List<HostDetails> hostDetailsList = new ArrayList<>();

@@ -25,6 +25,7 @@ public class GuestService {
     @Autowired
     UserRepository userRepository;
 
+    // todo: handle empty response
     public Mono<GuestSearchResponse> getAllGuests(boolean includeUserInfo) {
         GuestSearchResponse response = new GuestSearchResponse();
         List<GuestDetails> guestDetailsList = new ArrayList<>();

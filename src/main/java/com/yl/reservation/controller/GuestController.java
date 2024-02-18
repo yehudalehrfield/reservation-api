@@ -48,7 +48,7 @@ public class GuestController {
     }
 
     @MutationMapping
-    Mono<GuestCreateUpdateResponse> createGuest(@Argument GuestCreateUpdateRequest guestCreateUpdateRequest) {
+    public Mono<GuestCreateUpdateResponse> createGuest(@Argument GuestCreateUpdateRequest guestCreateUpdateRequest) {
         ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "createGuest");
         String createDateTime = ResUtil.getCurrentDateTimeString();
         return guestService.createGuest(guestCreateUpdateRequest.getGuest(), createDateTime)
@@ -61,7 +61,7 @@ public class GuestController {
     }
 
     @MutationMapping
-    Mono<GuestCreateUpdateResponse> updateGuest(@Argument GuestCreateUpdateRequest guestCreateUpdateRequest) {
+    public Mono<GuestCreateUpdateResponse> updateGuest(@Argument GuestCreateUpdateRequest guestCreateUpdateRequest) {
         ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "updateGuest");
         String updateDateTime = ResUtil.getCurrentDateTimeString();
         return guestService.updateGuest(guestCreateUpdateRequest.getGuest(), updateDateTime)
