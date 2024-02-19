@@ -16,8 +16,10 @@ import com.yl.reservation.service.host.HostDetails;
 import com.yl.reservation.util.ResConstants;
 import com.yl.reservation.util.ResUtil;
 
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+@Service
 public class ReservationService {
 
   @Autowired
