@@ -2,6 +2,7 @@ package com.yl.reservation.service.host;
 
 import com.yl.reservation.exception.ResGraphException;
 import com.yl.reservation.model.*;
+import com.yl.reservation.repository.GuestRepository;
 import com.yl.reservation.repository.HostRepository;
 import com.yl.reservation.repository.UserRepository;
 import com.yl.reservation.util.CreateUpdateMapper;
@@ -18,11 +19,15 @@ import java.util.List;
 
 @Service
 public class HostService {
-    @Autowired
-    HostRepository hostRepository;
+
+    private final HostRepository hostRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    UserRepository userRepository;
+    public HostService(HostRepository hostRepository, UserRepository userRepository){
+        this.hostRepository = hostRepository;
+        this.userRepository = userRepository;
+    }
 
     // todo: handle empty response
     public Mono<HostSearchResponse> getAllHosts(boolean includeUserInfo) {

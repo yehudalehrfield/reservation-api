@@ -1,6 +1,11 @@
 package com.yl.reservation.util;
 
 public class ResConstants {
+
+    private ResConstants() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static final String GENERAL_RESERVATION_ERROR = "Sorry, something went wrong with reservation api...";
 
     // USER

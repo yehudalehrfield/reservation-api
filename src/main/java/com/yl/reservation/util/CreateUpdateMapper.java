@@ -14,6 +14,10 @@ import org.springframework.util.StringUtils;
 
 public class CreateUpdateMapper {
 
+    private CreateUpdateMapper() {
+        throw new IllegalStateException("Utility class");
+    }
+
     // ╔══════╗
     // ║ USER ║
     // ╚══════╝
@@ -154,9 +158,7 @@ public class CreateUpdateMapper {
             return true;
         if (!requestReservation.getEndDate().equals(updatedReservation.getEndDate()))
             return true;
-        if (!requestReservation.getNotes().equals(updatedReservation.getNotes()))
-            return true;
-        return false;
+        return !requestReservation.getNotes().equals(updatedReservation.getNotes());
     }
 
 }

@@ -8,25 +8,24 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class RequestValidatorServiceTest {
+class RequestValidatorServiceTest {
 
     @InjectMocks
     RequestValidatorService requestValidatorService;
 
     @Test
-    void phoneValidation(){
-        ResException ex =  Assertions.assertThrows(ResException.class,
-                () -> RequestValidatorService.validatePhoneNumber(
-                "123456789"));
-        Assertions.assertEquals("Invalid phone number: 123456789", ex.getMessage());
+    void phoneValidation() {
+        ResException ex = Assertions.assertThrows(ResException.class,
+                () -> RequestValidatorService.validatePhoneNumber("123456789"));
+        Assertions.assertEquals(ResConstants.INVALID_VALUE + "phone number: 123456789", ex.getMessage());
 
     }
 
     @Test
-    void emailValidation(){
+    void emailValidation() {
         ResException ex = Assertions.assertThrows(ResException.class, () -> RequestValidatorService.validateEmail(
                 "emailAddress"));
-        Assertions.assertEquals("Invalid email address: emailAddress", ex.getMessage());
+        Assertions.assertEquals(ResConstants.INVALID_VALUE + "email address: emailAddress", ex.getMessage());
 
     }
 }

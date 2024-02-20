@@ -24,7 +24,7 @@ import reactor.test.StepVerifier;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
-public class GuestServiceTest {
+class GuestServiceTest {
 
         @InjectMocks
         GuestService guestService;

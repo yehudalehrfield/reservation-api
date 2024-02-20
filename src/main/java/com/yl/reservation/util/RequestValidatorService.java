@@ -24,7 +24,7 @@ public class RequestValidatorService {
     private static final Pattern EMAIL_REGEX_PATTERN = Pattern.compile(
             "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
     private static final Pattern DATE_REGEX_PATTERN = Pattern.compile(
-            "^(20|21)\\d\\d[-](0[1-9]|1[012])[-](0?[1-9]|[12][0-9]|3[01])$");
+            "^(20|21)\\d\\d-(0[1-9]|1[012])-(0?[1-9]|[12]\\d|3[01])$");
 
     // ╔══════╗
     // ║ USER ║
@@ -137,9 +137,9 @@ public class RequestValidatorService {
             throw new ResGraphException("Reservation endDate" + ResConstants.MISSING_FIELD, HttpStatus.BAD_REQUEST);
         validateDate(requestReservation.getStartDate());
         validateDate(requestReservation.getEndDate());
-        LocalDate startdate = LocalDate.parse(requestReservation.getStartDate());
+        LocalDate startDate = LocalDate.parse(requestReservation.getStartDate());
         LocalDate endDate = LocalDate.parse(requestReservation.getEndDate());
-        if (startdate.isEqual(endDate) || startdate.isAfter(endDate))
+        if (startDate.isEqual(endDate) || startDate.isAfter(endDate))
             throw new ResGraphException("Reservation endDate cannot be on or before reservation startDate.",
                     HttpStatus.BAD_REQUEST);
     }

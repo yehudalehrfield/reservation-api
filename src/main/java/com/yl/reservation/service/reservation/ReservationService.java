@@ -26,17 +26,18 @@ import reactor.core.publisher.Mono;
 @Service
 public class ReservationService {
 
-  @Autowired
-  ReservationRepository reservationRepository;
+    private final ReservationRepository reservationRepository;
+    private final HostRepository hostRepository;
+    private final GuestRepository guestRepository;
+    private final UserRepository userRepository;
 
-  @Autowired
-  HostRepository hostRepository;
-
-  @Autowired
-  GuestRepository guestRepository;
-
-  @Autowired
-  UserRepository userRepository;
+    @Autowired
+    public ReservationService(ReservationRepository reservationRepository, HostRepository hostRepository, GuestRepository guestRepository, UserRepository userRepository){
+        this.reservationRepository = reservationRepository;
+        this.hostRepository = hostRepository;
+        this.guestRepository = guestRepository;
+        this.userRepository = userRepository;
+    }
 
   public Mono<ReservationSearchResponse> getAllReservations() {
     ReservationSearchResponse response = new ReservationSearchResponse();
@@ -98,26 +99,24 @@ public class ReservationService {
             return Mono
                 .zip(hostRepository.findByHostId(requestReservation.getHostId()),
                     guestRepository.findByGuestId(requestReservation.getGuestId()))
-                .flatMap(hostAndGuest -> {
-                  return reservationRepository.findByHostId(requestReservation.getHostId())
-                      .collectList()
-                      .flatMap(reservationListForHost -> {
-                        if (reservationListForHost.isEmpty()
-                            || RequestValidatorService.checkForDateConflicts(reservationListForHost,
-                                requestReservation)) {
-                          requestReservation.setReservationId(ResUtil.generateId());
-                          requestReservation.setCreatedDate(createDateTime);
-                          requestReservation.setLastUpdated(createDateTime);
-                          return reservationRepository.save(requestReservation)
-                              .map(createdRes -> new ReservationCreateUpdateResponse(
-                                  ResConstants.RESERVATION_CREATE + createdRes.getReservationId(), createdRes));
-                        } else {
-                          return Mono.error(
-                              new ResGraphException("Date conflict with existing reservation", HttpStatus.BAD_REQUEST));
-                        }
+                .flatMap(hostAndGuest -> reservationRepository.findByHostId(requestReservation.getHostId())
+                    .collectList()
+                    .flatMap(reservationListForHost -> {
+                      if (reservationListForHost.isEmpty()
+                          || RequestValidatorService.checkForDateConflicts(reservationListForHost,
+                              requestReservation)) {
+                        requestReservation.setReservationId(ResUtil.generateId());
+                        requestReservation.setCreatedDate(createDateTime);
+                        requestReservation.setLastUpdated(createDateTime);
+                        return reservationRepository.save(requestReservation)
+                            .map(createdRes -> new ReservationCreateUpdateResponse(
+                                ResConstants.RESERVATION_CREATE + createdRes.getReservationId(), createdRes));
+                      } else {
+                        return Mono.error(
+                            new ResGraphException("Date conflict with existing reservation", HttpStatus.BAD_REQUEST));
+                      }
 
-                      });
-                })
+                    }))
                 // this gets invoked when hostId or guestId is not found (returns an empty mono)
                 .switchIfEmpty(Mono.error(new ResGraphException("Invalid hostId or guestId", HttpStatus.BAD_REQUEST)));
           }
@@ -129,8 +128,6 @@ public class ReservationService {
     RequestValidatorService.validateUpdateReservation(requestReservation);
     return reservationRepository.findByReservationId(requestReservation.getReservationId())
         .flatMap(existingReservation -> {
-          // todo: get all other reservations associated with this hostId and validate
-          // dates
           if (StringUtils.hasText(requestReservation.getStartDate())
               || StringUtils.hasText(requestReservation.getEndDate())) {
             return reservationRepository.findByHostId(existingReservation.getHostId())

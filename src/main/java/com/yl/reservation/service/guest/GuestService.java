@@ -19,11 +19,14 @@ import java.util.List;
 @Service
 public class GuestService {
 
-    @Autowired
-    GuestRepository guestRepository;
+    private final GuestRepository guestRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    UserRepository userRepository;
+    public GuestService(GuestRepository guestRepository, UserRepository userRepository){
+        this.guestRepository = guestRepository;
+        this.userRepository = userRepository;
+    }
 
     // todo: handle empty response
     public Mono<GuestSearchResponse> getAllGuests(boolean includeUserInfo) {

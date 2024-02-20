@@ -7,6 +7,6 @@ import lombok.Data;
 @Data
 public class ReservationSearchResponse {
   private String message;
-  private List<ReservationDetails> ReservationDetailsList;
+  private List<ReservationDetails> reservationDetailsList;
 
 }

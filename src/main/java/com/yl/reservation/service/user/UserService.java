@@ -2,6 +2,7 @@ package com.yl.reservation.service.user;
 
 import com.yl.reservation.exception.ResGraphException;
 import com.yl.reservation.model.*;
+import com.yl.reservation.repository.HostRepository;
 import com.yl.reservation.repository.UserRepository;
 import com.yl.reservation.util.CreateUpdateMapper;
 import com.yl.reservation.util.RequestValidatorService;
@@ -17,8 +18,12 @@ import java.util.List;
 @Service
 public class UserService {
 
+    private final UserRepository userRepository;
+
     @Autowired
-    UserRepository userRepository;
+    public UserService(UserRepository userRepository){
+        this.userRepository = userRepository;
+    }
 
     public Mono<UserResponse> getAllUsers() {
         return userRepository.findAll()

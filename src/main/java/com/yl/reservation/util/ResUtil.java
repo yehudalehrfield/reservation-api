@@ -5,6 +5,10 @@ import java.util.UUID;
 
 public class ResUtil {
 
+    private ResUtil() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static String getCurrentDateTimeString() {
         return LocalDateTime.now().toString();
     }
