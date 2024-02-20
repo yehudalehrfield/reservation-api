@@ -12,4 +12,5 @@ public interface ReservationRepository extends ReactiveMongoRepository<Reservati
 
     Flux<Reservation> findByHostIdAndGuestId(String hostId, String guestId);
 
+    Flux<Reservation> findByHostId(String hostId);
 }

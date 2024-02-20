@@ -4,8 +4,13 @@ import com.yl.reservation.exception.ResGraphException;
 import com.yl.reservation.exception.ResException;
 import com.yl.reservation.model.Guest;
 import com.yl.reservation.model.Host;
+import com.yl.reservation.model.Reservation;
 import com.yl.reservation.model.User;
+
+import java.time.LocalDate;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 
 public class CreateUpdateMapper {
 
@@ -110,6 +115,46 @@ public class CreateUpdateMapper {
                 && !requestHost.getPrivateEntrance().equals(updatedHost.getPrivateEntrance()))
             return true;
         return (requestHost.getNotes() != null && !requestHost.getNotes().equals(updatedHost.getNotes()));
+    }
+
+    // ╔═════════════╗
+    // ║ RESERVATION ║
+    // ╚═════════════╝
+
+    public static Reservation updateReservation(Reservation reservationToUpdate, Reservation reservationFromRequest,
+            String updateDateTime) {
+        if (!isReservationUpdate(reservationToUpdate, reservationFromRequest)) {
+            // todo: ResGraphException?
+            throw new ResException("No updates to apply", HttpStatus.OK);
+        } else {
+            if (StringUtils.hasText(reservationFromRequest.getStartDate()))
+                reservationToUpdate.setStartDate(reservationFromRequest.getStartDate());
+            if (StringUtils.hasText(reservationFromRequest.getEndDate())) {
+                LocalDate endDate = LocalDate.parse(reservationFromRequest.getEndDate());
+                LocalDate startDate = LocalDate.parse(reservationToUpdate.getStartDate());
+                if (endDate.isBefore(startDate) || endDate.isEqual(startDate))
+                    throw new ResException("Reservation end date cannot be before reservation start date",
+                            HttpStatus.BAD_REQUEST);
+                else
+                    reservationToUpdate.setEndDate(reservationFromRequest.getEndDate());
+            }
+            if (StringUtils.hasText(reservationFromRequest.getNotes()))
+                reservationToUpdate.setNotes(reservationFromRequest.getNotes());
+
+            reservationToUpdate.setLastUpdated(updateDateTime);
+
+            return reservationToUpdate;
+        }
+    }
+
+    public static boolean isReservationUpdate(Reservation updatedReservation, Reservation requestReservation) {
+        if (requestReservation.getStartDate() != updatedReservation.getStartDate())
+            return true;
+        if (requestReservation.getEndDate() != updatedReservation.getEndDate())
+            return true;
+        if (requestReservation.getNotes() != updatedReservation.getNotes())
+            return true;
+        return false;
     }
 
 }

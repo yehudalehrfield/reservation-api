@@ -5,11 +5,14 @@ import com.yl.reservation.exception.ResException;
 import com.yl.reservation.model.ContactMethod;
 import com.yl.reservation.model.Guest;
 import com.yl.reservation.model.Host;
+import com.yl.reservation.model.Reservation;
 import com.yl.reservation.model.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,12 +23,13 @@ public class RequestValidatorService {
             "^[+]?(\\d{1,2})?[\\s.-]?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$");
     private static final Pattern EMAIL_REGEX_PATTERN = Pattern.compile(
             "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern DATE_REGEX_PATTERN = Pattern.compile(
+            "^(20|21)\\d\\d[-](0[1-9]|1[012])[-](0?[1-9]|[12][0-9]|3[01])$");
 
-    /*
-     ╔══════╗
-     ║ USER ║
-     ╚══════╝
-     */
+    // ╔══════╗
+    // ║ USER ║
+    // ╚══════╝
+
     public static void validateCreateUserInfo(User user) {
         if (StringUtils.hasText(user.getUserId()))
             throw new ResException("Cannot create new user with a given userId", HttpStatus.BAD_REQUEST);
@@ -79,11 +83,15 @@ public class RequestValidatorService {
             throw new ResException("Invalid email address: " + email, HttpStatus.BAD_REQUEST);
     }
 
-    /*
-     ╔══════╗
-     ║ HOST ║
-     ╚══════╝
-     */
+    public static void validateDate(String date) {
+        Matcher matchPhone = DATE_REGEX_PATTERN.matcher(date);
+        if (!matchPhone.find())
+            throw new ResException("Invalid date: " + date + ". Correct format is yyyy-DD-mm", HttpStatus.BAD_REQUEST);
+    }
+
+    // ╔══════╗
+    // ║ HOST ║
+    // ╚══════╝
 
     public static void validateCreateHostInfo(Host host) {
         if (host.getUserId() == null)
@@ -97,11 +105,9 @@ public class RequestValidatorService {
             throw new ResGraphException(ResConstants.HOST_ID_REQUIRED_FOR_ADDRESS_UPDATE, HttpStatus.BAD_REQUEST);
     }
 
-    /*
-     ╔═══════╗
-     ║ GUEST ║
-     ╚═══════╝
-     */
+    // ╔═══════╗
+    // ║ GUEST ║
+    // ╚═══════╝
 
     public static void validateCreateGuestInfo(Guest requestGuest) {
         if (requestGuest.getUserId() == null)
@@ -119,4 +125,45 @@ public class RequestValidatorService {
             throw new ResException("Invalid value for " + "numChildren", HttpStatus.BAD_REQUEST);
     }
 
+    // ╔═════════════╗
+    // ║ RESERVATION ║
+    // ╚═════════════╝
+
+    public static void validateCreateReservationInfo(Reservation requestReservation) {
+        if (!StringUtils.hasText(requestReservation.getStartDate()))
+            throw new ResGraphException("Reservation startDate" + ResConstants.MISSING_FIELD, HttpStatus.BAD_REQUEST);
+        if (!StringUtils.hasText(requestReservation.getEndDate()))
+            throw new ResGraphException("Reservation endDate" + ResConstants.MISSING_FIELD, HttpStatus.BAD_REQUEST);
+        validateDate(requestReservation.getStartDate());
+        validateDate(requestReservation.getEndDate());
+        LocalDate startdate = LocalDate.parse(requestReservation.getStartDate());
+        LocalDate endDate = LocalDate.parse(requestReservation.getEndDate());
+        if (startdate.isEqual(endDate) || startdate.isAfter(endDate))
+            throw new ResGraphException("Reservation endDate cannot be on or before reservation startDate.",
+                    HttpStatus.BAD_REQUEST);
+    }
+
+    public static void validateUpdateReservation(Reservation requestReservation) {
+        if (StringUtils.hasText(requestReservation.getStartDate()))
+            validateDate(requestReservation.getStartDate());
+        if (StringUtils.hasText(requestReservation.getEndDate()))
+            validateDate(requestReservation.getEndDate());
+    }
+
+    public static boolean checkForDateConflicts(List<Reservation> reservationListForHost,
+            Reservation requestReservation) {
+        LocalDate requestReservationStartDate = LocalDate.parse(requestReservation.getStartDate());
+        LocalDate requestReservationEndDate = LocalDate.parse(requestReservation.getEndDate());
+        // todo: are these all the possible scenarios?
+        for (Reservation existingReservation : reservationListForHost) {
+            LocalDate existingReservationStartDate = LocalDate.parse(existingReservation.getStartDate());
+            LocalDate existingReservationEndDate = LocalDate.parse(existingReservation.getEndDate());
+            if (requestReservationStartDate.isBefore(existingReservationStartDate)) {
+                if (existingReservationStartDate.isBefore(requestReservationEndDate))
+                    return false;
+            } else if (requestReservationStartDate.isBefore(existingReservationEndDate))
+                return false;
+        }
+        return true;
+    }
 }

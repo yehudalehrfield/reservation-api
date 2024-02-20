@@ -13,6 +13,8 @@ import com.yl.reservation.repository.ReservationRepository;
 import com.yl.reservation.repository.UserRepository;
 import com.yl.reservation.service.guest.GuestDetails;
 import com.yl.reservation.service.host.HostDetails;
+import com.yl.reservation.util.CreateUpdateMapper;
+import com.yl.reservation.util.RequestValidatorService;
 import com.yl.reservation.util.ResConstants;
 import com.yl.reservation.util.ResUtil;
 
@@ -82,6 +84,7 @@ public class ReservationService {
 
   public Mono<ReservationCreateUpdateResponse> createReservation(Reservation requestReservation,
       String createDateTime) {
+    RequestValidatorService.validateCreateReservationInfo(requestReservation);
     return validateNotExistingReservation(requestReservation)
         .flatMap(res -> {
           // todo: change strucutre of the validation method. throw error from within and
@@ -94,16 +97,27 @@ public class ReservationService {
                 .zip(hostRepository.findByHostId(requestReservation.getHostId()),
                     guestRepository.findByGuestId(requestReservation.getGuestId()))
                 .flatMap(hostAndGuest -> {
-                  // todo: validate both host and user exist
-                  // todo: validate dates do not conflict with existing reservation for this host
-                  // -> get all reservations for this host and check the dates
-                  requestReservation.setReservationId(ResUtil.generateId());
-                  requestReservation.setCreatedDate(createDateTime);
-                  requestReservation.setLastUpdated(createDateTime);
-                  return reservationRepository.save(requestReservation)
-                      .map(createdRes -> new ReservationCreateUpdateResponse(
-                          ResConstants.RESERVATION_CREATE + createdRes.getReservationId(), createdRes));
-                });
+                  return reservationRepository.findByHostId(requestReservation.getHostId())
+                      .collectList()
+                      .flatMap(reservationListForHost -> {
+                        if (reservationListForHost.isEmpty()
+                            || RequestValidatorService.checkForDateConflicts(reservationListForHost,
+                                requestReservation)) {
+                          requestReservation.setReservationId(ResUtil.generateId());
+                          requestReservation.setCreatedDate(createDateTime);
+                          requestReservation.setLastUpdated(createDateTime);
+                          return reservationRepository.save(requestReservation)
+                              .map(createdRes -> new ReservationCreateUpdateResponse(
+                                  ResConstants.RESERVATION_CREATE + createdRes.getReservationId(), createdRes));
+                        } else {
+                          return Mono.error(
+                              new ResGraphException("Date conflict with existing reservation", HttpStatus.BAD_REQUEST));
+                        }
+
+                      });
+                })
+                // this gets invoked when hostId or guestId is not found (returns an empty mono)
+                .switchIfEmpty(Mono.error(new ResGraphException("Invalid hostId or guestId", HttpStatus.BAD_REQUEST)));
           }
         });
   }
@@ -112,8 +126,10 @@ public class ReservationService {
       String updateDateTime) {
     return reservationRepository.findByReservationId(requestReservation.getReservationId())
         .flatMap(existingReservation -> {
-          // todo: update this to call Mapper method to update reservation
-          Reservation updatedReservation = new Reservation();
+          // todo: get all other reservations associated with this hostId and validate
+          // dates
+          Reservation updatedReservation = CreateUpdateMapper.updateReservation(existingReservation, requestReservation,
+              updateDateTime);
           return reservationRepository.save(updatedReservation)
               .map(updatedRes -> new ReservationCreateUpdateResponse(
                   ResConstants.RESERVATION_UPDATE + updatedRes.getReservationId(), updatedRes));

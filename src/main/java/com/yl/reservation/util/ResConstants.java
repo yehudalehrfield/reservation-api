@@ -41,6 +41,8 @@ public class ResConstants {
     public static final String RESERVATION_UPDATE = "Updated reservation ";
     public static final String RESERVATION_CREATE = "Created reservation ";
     public static final String RESERVATION_NOT_FOUND_WITH_ID = "No reservation with id ";
-
     public static final String RESERVATION_ALREADY_EXISTS_ERROR = "Reservation already exists";
+
+    // GENERAL
+    public static final String MISSING_FIELD = " is missing or blank";
 }
