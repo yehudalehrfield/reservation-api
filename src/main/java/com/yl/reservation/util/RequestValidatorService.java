@@ -34,9 +34,9 @@ public class RequestValidatorService {
         if (StringUtils.hasText(user.getUserId()))
             throw new ResException("Cannot create new user with a given userId", HttpStatus.BAD_REQUEST);
         if (!StringUtils.hasText(user.getLastName()))
-            throw new ResException("Last name is blank or missing from the request", HttpStatus.BAD_REQUEST);
+            throw new ResException("Last name" + ResConstants.MISSING_FIELD, HttpStatus.BAD_REQUEST);
         if (!StringUtils.hasText(user.getFirstName()))
-            throw new ResException("First name is blank or missing from the request", HttpStatus.BAD_REQUEST);
+            throw new ResException("First name" + ResConstants.MISSING_FIELD, HttpStatus.BAD_REQUEST);
         validateContactInfo(user);
     }
 
@@ -74,19 +74,20 @@ public class RequestValidatorService {
     public static void validatePhoneNumber(String phoneNumber) {
         Matcher matchPhone = PHONE_REGEX_PATTERN.matcher(phoneNumber);
         if (!matchPhone.find())
-            throw new ResException("Invalid phone number: " + phoneNumber, HttpStatus.BAD_REQUEST);
+            throw new ResException(ResConstants.INVALID_VALUE + "phone number: " + phoneNumber, HttpStatus.BAD_REQUEST);
     }
 
     public static void validateEmail(String email) {
         Matcher matchPhone = EMAIL_REGEX_PATTERN.matcher(email);
         if (!matchPhone.find())
-            throw new ResException("Invalid email address: " + email, HttpStatus.BAD_REQUEST);
+            throw new ResException(ResConstants.INVALID_VALUE + "email address: " + email, HttpStatus.BAD_REQUEST);
     }
 
     public static void validateDate(String date) {
         Matcher matchPhone = DATE_REGEX_PATTERN.matcher(date);
         if (!matchPhone.find())
-            throw new ResException("Invalid date: " + date + ". Correct format is yyyy-DD-mm", HttpStatus.BAD_REQUEST);
+            throw new ResException(ResConstants.INVALID_VALUE + "date: " + date + ". Correct format is yyyy-DD-mm",
+                    HttpStatus.BAD_REQUEST);
     }
 
     // ╔══════╗
@@ -95,9 +96,9 @@ public class RequestValidatorService {
 
     public static void validateCreateHostInfo(Host host) {
         if (host.getUserId() == null)
-            throw new ResGraphException("userId is missing from the request", HttpStatus.BAD_REQUEST);
+            throw new ResGraphException("userId" + ResConstants.MISSING_FIELD, HttpStatus.BAD_REQUEST);
         if (host.getAddress() == null)
-            throw new ResGraphException("Address is missing from the request", HttpStatus.BAD_REQUEST);
+            throw new ResGraphException("Address" + ResConstants.MISSING_FIELD, HttpStatus.BAD_REQUEST);
     }
 
     public static void validateUpdateHostInfo(Host host, boolean isAddressUpdate) {
@@ -120,9 +121,9 @@ public class RequestValidatorService {
         if (guest.getGuestId() == null && guest.getNickName() != null)
             throw new ResException(ResConstants.GUEST_ID_REQUIRED_FOR_NICKNAME_UPDATE, HttpStatus.BAD_REQUEST);
         if (guest.getNumAdults() < 0)
-            throw new ResException("Invalid value for " + "numAdults", HttpStatus.BAD_REQUEST);
+            throw new ResException(ResConstants.INVALID_VALUE + "numAdults", HttpStatus.BAD_REQUEST);
         if (guest.getNumChildren() < 0)
-            throw new ResException("Invalid value for " + "numChildren", HttpStatus.BAD_REQUEST);
+            throw new ResException(ResConstants.INVALID_VALUE + "numChildren", HttpStatus.BAD_REQUEST);
     }
 
     // ╔═════════════╗

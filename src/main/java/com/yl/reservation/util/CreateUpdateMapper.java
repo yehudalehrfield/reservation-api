@@ -21,7 +21,7 @@ public class CreateUpdateMapper {
     public static User updateUser(User userToUpdate, User userFromRequest, String updateDateTime) {
         boolean isUserUpdate = isUserUpdate(userToUpdate, userFromRequest);
         if (!isUserUpdate)
-            throw new ResGraphException("No updates to apply to user", HttpStatus.BAD_REQUEST);
+            throw new ResGraphException(ResConstants.NO_UPDATES_APPLICABLE, HttpStatus.BAD_REQUEST);
         if (userFromRequest.getEmail() != null)
             userToUpdate.setEmail(userFromRequest.getEmail());
         if (userFromRequest.getPhone() != null)

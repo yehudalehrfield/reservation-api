@@ -46,4 +46,5 @@ public class ResConstants {
     // GENERAL
     public static final String MISSING_FIELD = " is missing or blank";
     public static final String NO_UPDATES_APPLICABLE = "No updates to apply";
+    public static final String INVALID_VALUE = "Invalid value for ";
 }
