@@ -46,7 +46,7 @@ public class CreateUpdateMapper {
 
     public static Guest updateGuest(Guest guestToUpdate, Guest guestFromRequest, String updateDateTime) {
         if (!isGuestUpdate(guestToUpdate, guestFromRequest)) {
-            throw new ResException("No updates to apply", HttpStatus.OK);
+            throw new ResException(ResConstants.NO_UPDATES_APPLICABLE, HttpStatus.OK);
         } else {
             if (guestFromRequest.getNickName() != null)
                 guestToUpdate.setNickName(guestFromRequest.getNickName());
@@ -83,7 +83,7 @@ public class CreateUpdateMapper {
 
     public static Host updateHost(Host hostToUpdate, Host hostFromRequest, String updateDateTime) {
         if (!isHostUpdate(hostToUpdate, hostFromRequest)) {
-            throw new ResException("No updates to apply", HttpStatus.OK);
+            throw new ResException(ResConstants.NO_UPDATES_APPLICABLE, HttpStatus.OK);
         } else {
             if (hostFromRequest.getAddress() != null)
                 hostToUpdate.setAddress(hostFromRequest.getAddress());
@@ -125,8 +125,10 @@ public class CreateUpdateMapper {
             String updateDateTime) {
         if (!isReservationUpdate(reservationToUpdate, reservationFromRequest)) {
             // todo: ResGraphException?
-            throw new ResException("No updates to apply", HttpStatus.OK);
+            throw new ResException(ResConstants.NO_UPDATES_APPLICABLE, HttpStatus.OK);
         } else {
+            // checking if there are conflicts with other reservations
+
             if (StringUtils.hasText(reservationFromRequest.getStartDate()))
                 reservationToUpdate.setStartDate(reservationFromRequest.getStartDate());
             if (StringUtils.hasText(reservationFromRequest.getEndDate())) {
@@ -148,11 +150,11 @@ public class CreateUpdateMapper {
     }
 
     public static boolean isReservationUpdate(Reservation updatedReservation, Reservation requestReservation) {
-        if (requestReservation.getStartDate() != updatedReservation.getStartDate())
+        if (!requestReservation.getStartDate().equals(updatedReservation.getStartDate()))
             return true;
-        if (requestReservation.getEndDate() != updatedReservation.getEndDate())
+        if (!requestReservation.getEndDate().equals(updatedReservation.getEndDate()))
             return true;
-        if (requestReservation.getNotes() != updatedReservation.getNotes())
+        if (!requestReservation.getNotes().equals(updatedReservation.getNotes()))
             return true;
         return false;
     }

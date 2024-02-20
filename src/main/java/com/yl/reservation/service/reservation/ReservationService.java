@@ -19,6 +19,8 @@ import com.yl.reservation.util.ResConstants;
 import com.yl.reservation.util.ResUtil;
 
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
 import reactor.core.publisher.Mono;
 
 @Service
@@ -124,15 +126,39 @@ public class ReservationService {
 
   public Mono<ReservationCreateUpdateResponse> updateReservation(Reservation requestReservation,
       String updateDateTime) {
+    RequestValidatorService.validateUpdateReservation(requestReservation);
     return reservationRepository.findByReservationId(requestReservation.getReservationId())
         .flatMap(existingReservation -> {
           // todo: get all other reservations associated with this hostId and validate
           // dates
-          Reservation updatedReservation = CreateUpdateMapper.updateReservation(existingReservation, requestReservation,
-              updateDateTime);
-          return reservationRepository.save(updatedReservation)
-              .map(updatedRes -> new ReservationCreateUpdateResponse(
-                  ResConstants.RESERVATION_UPDATE + updatedRes.getReservationId(), updatedRes));
+          if (StringUtils.hasText(requestReservation.getStartDate())
+              || StringUtils.hasText(requestReservation.getEndDate())) {
+            return reservationRepository.findByHostId(existingReservation.getHostId())
+                .collectList()
+                .flatMap(reservationListForHost -> {
+                  if (reservationListForHost.isEmpty()
+                      || RequestValidatorService.checkForDateConflicts(reservationListForHost,
+                          requestReservation)) {
+                    Reservation updatedReservation = CreateUpdateMapper.updateReservation(existingReservation,
+                        requestReservation,
+                        updateDateTime);
+                    return reservationRepository.save(updatedReservation)
+                        .map(updatedRes -> new ReservationCreateUpdateResponse(
+                            ResConstants.RESERVATION_UPDATE + updatedRes.getReservationId(), updatedRes));
+                  } else {
+                    return Mono.error(
+                        new ResGraphException("Date conflict with existing reservation", HttpStatus.BAD_REQUEST));
+                  }
+
+                });
+          } else {
+            Reservation updatedReservation = CreateUpdateMapper.updateReservation(existingReservation,
+                requestReservation,
+                updateDateTime);
+            return reservationRepository.save(updatedReservation)
+                .map(updatedRes -> new ReservationCreateUpdateResponse(
+                    ResConstants.RESERVATION_UPDATE + updatedRes.getReservationId(), updatedRes));
+          }
         })
         .switchIfEmpty(
             Mono.error(new ResGraphException(
