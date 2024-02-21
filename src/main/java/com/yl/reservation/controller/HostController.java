@@ -35,6 +35,7 @@ public class HostController {
                 .cache();
     }
 
+
     @QueryMapping
     public Mono<HostSearchResponse> getHostById(@Argument String hostId, @Argument boolean includeUserInfo) {
         ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "getHostById");

@@ -163,7 +163,7 @@ public class GuestControllerTest {
                 GuestCreateUpdateRequest request = new GuestCreateUpdateRequest();
                 request.setGuest(guest);
 
-                GuestCreateUpdateResponse response = new GuestCreateUpdateResponse("Guest created successfully", guest);
+                GuestCreateUpdateResponse response = new GuestCreateUpdateResponse("Guest updated successfully", guest);
 
                 Mockito.when(guestService.updateGuest(Mockito.any(), Mockito.anyString()))
                                 .thenReturn(Mono.just(response));
