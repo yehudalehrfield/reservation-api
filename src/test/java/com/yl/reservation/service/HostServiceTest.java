@@ -4,6 +4,12 @@ import com.yl.reservation.exception.ResGraphException;
 import com.yl.reservation.model.*;
 import com.yl.reservation.repository.HostRepository;
 import com.yl.reservation.repository.UserRepository;
+import com.yl.reservation.service.host.HostCreateUpdateRequest;
+import com.yl.reservation.service.host.HostCreateUpdateResponse;
+import com.yl.reservation.service.host.HostDetails;
+import com.yl.reservation.service.host.HostSearchResponse;
+import com.yl.reservation.service.host.HostService;
+import com.yl.reservation.util.CreateUpdateMapper;
 import com.yl.reservation.util.ResConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -46,7 +52,8 @@ public class HostServiceTest {
         HostDetails hostDetailsWithUserInfo = new HostDetails(host1, user1);
         HostDetails hostDetailsNoUserInfo = new HostDetails(host1, null);
 
-        HostSearchResponse responseWithUserInfo = new HostSearchResponse("Retrieved host hostId1 with user info...",
+        HostSearchResponse responseWithUserInfo = new HostSearchResponse(
+                "Retrieved host hostId1 with user info...",
                 List.of(hostDetailsWithUserInfo));
         HostSearchResponse responseNoUserInfo = new HostSearchResponse("Retrieved host hostId1",
                 List.of(hostDetailsNoUserInfo));
@@ -63,6 +70,7 @@ public class HostServiceTest {
                 .verifyComplete();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void getAllHosts() {
         Host host1 = new Host();
@@ -88,7 +96,8 @@ public class HostServiceTest {
                 List.of(hostDetails3, hostDetails4));
 
         Mockito.when(hostRepository.findAll()).thenReturn(Flux.just(host1, host2));
-        Mockito.when(userRepository.findByUserId(Mockito.anyString())).thenReturn(Mono.just(user1), Mono.just(user2));
+        Mockito.when(userRepository.findByUserId(Mockito.anyString())).thenReturn(Mono.just(user1),
+                Mono.just(user2));
 
         StepVerifier.create(hostService.getAllHosts(true))
                 .expectNext(responseWithUserInfo)
@@ -145,10 +154,11 @@ public class HostServiceTest {
 
         HostCreateUpdateResponse response = new HostCreateUpdateResponse("Updated host null", requestHost);
 
-        Mockito.when(hostRepository.findByUserIdAndAddress(Mockito.anyString(), Mockito.any())).thenReturn(Mono.just(existingHost));
+        Mockito.when(hostRepository.findByUserIdAndAddress(Mockito.anyString(), Mockito.any()))
+                .thenReturn(Mono.just(existingHost));
         Mockito.when(hostRepository.save(Mockito.any())).thenReturn(Mono.just(requestHost));
 
-        StepVerifier.create(hostService.updateHost(requestHost, false,"today"))
+        StepVerifier.create(hostService.updateHost(requestHost, false, "today"))
                 .expectNext(response)
                 .verifyComplete();
 
@@ -171,21 +181,24 @@ public class HostServiceTest {
         Host existingHost = new Host();
         existingHost.setAddress(hostAddress);
 
-        ResGraphException expectedError = new ResGraphException(ResConstants.HOST_ID_REQUIRED_FOR_ADDRESS_UPDATE, HttpStatus.BAD_REQUEST);
+        ResGraphException expectedError = new ResGraphException(
+                ResConstants.HOST_ID_REQUIRED_FOR_ADDRESS_UPDATE, HttpStatus.BAD_REQUEST);
 
-        ResGraphException actualError = Assertions.assertThrows(ResGraphException.class, () -> hostService.updateHost(request.getHost(), true,"today"));
+        ResGraphException actualError = Assertions.assertThrows(ResGraphException.class,
+                () -> hostService.updateHost(request.getHost(), true, "today"));
         Assertions.assertEquals(expectedError, actualError);
 
     }
 
     @Test
-    void updateGuest_noGuestIdentifying(){
+    void updateGuest_noGuestIdentifying() {
         Host requestHost = new Host();
         requestHost.setUserId("userId1");
 
-        ResGraphException expectedError = new ResGraphException(ResConstants.HOST_NO_IDENTIFYING_ERROR, HttpStatus.BAD_REQUEST);
+        ResGraphException expectedError = new ResGraphException(ResConstants.HOST_NO_IDENTIFYING_ERROR,
+                HttpStatus.BAD_REQUEST);
 
-        StepVerifier.create(hostService.updateHost(requestHost,false, "today"))
+        StepVerifier.create(hostService.updateHost(requestHost, false, "today"))
                 .expectErrorMatches(error -> error.equals(expectedError))
                 .verify();
 
@@ -236,9 +249,11 @@ public class HostServiceTest {
         existingHost.setUserId("userId1");
         existingHost.setAddress(hostAddress);
 
-        Mockito.when(hostRepository.findByUserIdAndAddress(Mockito.any(), Mockito.any())).thenReturn(Mono.just(existingHost));
+        Mockito.when(hostRepository.findByUserIdAndAddress(Mockito.any(), Mockito.any()))
+                .thenReturn(Mono.just(existingHost));
 
-        ResGraphException expectedError = new ResGraphException(ResConstants.HOST_ALREADY_EXISTS_ERROR, HttpStatus.BAD_REQUEST);
+        ResGraphException expectedError = new ResGraphException(ResConstants.HOST_ALREADY_EXISTS_ERROR,
+                HttpStatus.BAD_REQUEST);
 
         StepVerifier.create(hostService.createHost(request.getHost(), "today"))
                 .expectErrorMatches(error -> error.equals(expectedError))
@@ -254,7 +269,8 @@ public class HostServiceTest {
         Address hostAddress = new Address("123 Main St.", null, "New York", State.NY, "10001");
         requestHost.setAddress(hostAddress);
 
-        Mockito.when(hostRepository.findByUserIdAndAddress(Mockito.anyString(), Mockito.any())).thenReturn(Mono.empty());
+        Mockito.when(hostRepository.findByUserIdAndAddress(Mockito.anyString(), Mockito.any()))
+                .thenReturn(Mono.empty());
         Mockito.when(userRepository.findByUserId(Mockito.any())).thenReturn(Mono.empty());
 
         ResGraphException error = new ResGraphException("No user with id: userId1", HttpStatus.BAD_REQUEST);

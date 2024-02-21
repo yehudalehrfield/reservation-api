@@ -1,10 +1,10 @@
 package com.yl.reservation.controller;
 
 import com.yl.reservation.exception.ResGraphException;
-import com.yl.reservation.service.GuestCreateUpdateRequest;
-import com.yl.reservation.service.GuestCreateUpdateResponse;
-import com.yl.reservation.service.GuestSearchResponse;
-import com.yl.reservation.service.GuestService;
+import com.yl.reservation.service.guest.GuestCreateUpdateRequest;
+import com.yl.reservation.service.guest.GuestCreateUpdateResponse;
+import com.yl.reservation.service.guest.GuestSearchResponse;
+import com.yl.reservation.service.guest.GuestService;
 import com.yl.reservation.util.ResConstants;
 import com.yl.reservation.util.ResLogger;
 import com.yl.reservation.util.ResUtil;
@@ -48,7 +48,7 @@ public class GuestController {
     }
 
     @MutationMapping
-    Mono<GuestCreateUpdateResponse> createGuest(@Argument GuestCreateUpdateRequest guestCreateUpdateRequest){
+    public Mono<GuestCreateUpdateResponse> createGuest(@Argument GuestCreateUpdateRequest guestCreateUpdateRequest) {
         ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "createGuest");
         String createDateTime = ResUtil.getCurrentDateTimeString();
         return guestService.createGuest(guestCreateUpdateRequest.getGuest(), createDateTime)
@@ -61,7 +61,7 @@ public class GuestController {
     }
 
     @MutationMapping
-    Mono<GuestCreateUpdateResponse> updateGuest(@Argument GuestCreateUpdateRequest guestCreateUpdateRequest){
+    public Mono<GuestCreateUpdateResponse> updateGuest(@Argument GuestCreateUpdateRequest guestCreateUpdateRequest) {
         ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "updateGuest");
         String updateDateTime = ResUtil.getCurrentDateTimeString();
         return guestService.updateGuest(guestCreateUpdateRequest.getGuest(), updateDateTime)
@@ -73,10 +73,9 @@ public class GuestController {
                 .cache();
     }
 
-    private static Mono<GuestSearchResponse> returnNotFound(ResLogger resLogger, String message){
+    private static Mono<GuestSearchResponse> returnNotFound(ResLogger resLogger, String message) {
         resLogger.setValuesToLogger(HttpStatus.NOT_FOUND, null);
         return Mono.error(new ResGraphException(message, HttpStatus.NOT_FOUND));
     }
 
 }
-

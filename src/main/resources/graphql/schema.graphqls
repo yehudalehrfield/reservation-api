@@ -5,6 +5,8 @@ type Query {
     getAllHosts(includeUserInfo: Boolean = false): HostSearchResponse
     getGuestById(guestId: String!, includeUserInfo: Boolean = false): GuestSearchResponse
     getAllGuests(includeUserInfo: Boolean = false): GuestSearchResponse
+    getAllReservations: ReservationSearchResponse
+    getReservationById(reservationId: String!): ReservationSearchResponse
 }
 
 type Mutation{
@@ -14,6 +16,8 @@ type Mutation{
     updateUser(userCreateUpdateRequest: UserCreateUpdateRequest): UserResponse
     createGuest(guestCreateUpdateRequest: GuestCreateUpdateRequest): GuestResponse
     updateGuest(guestCreateUpdateRequest: GuestCreateUpdateRequest): GuestResponse
+    createReservation(reservationCreateUpdateRequest: ReservationCreateUpdateRequest): ReservationResponse
+    updateReservation(reservationCreateUpdateRequest: ReservationCreateUpdateRequest): ReservationResponse
 }
 
 type User {
@@ -56,20 +60,41 @@ type Guest{
     lastUpdated: String
 }
 
+type Reservation{
+    id: ID #remove?
+    reservationId: String
+    hostId: String
+    guestId: String
+    startDate: String
+    endDate: String
+    notes: String
+    createDate: String
+    lastUpdated: String
+}
+
+#todo: rename?
 type UserResponse{
     message: String
     userList: [User]
 }
 
+#todo: rename?
 type HostResponse{
     message: String
     host: Host
     user: User
 }
 
+#todo: rename?
 type GuestResponse{
     message: String
     guest: Guest
+}
+
+#todo: rename?
+type ReservationResponse{
+    message: String
+    reservation: Reservation
 }
 
 type HostSearchResponse{
@@ -92,6 +117,17 @@ type GuestDetails{
     user: User
 }
 
+type ReservationSearchResponse{
+    message: String
+    reservationDetailsList: [ReservationDetails]
+}
+
+type ReservationDetails{
+    reservation: Reservation
+    hostDetails: HostDetails
+    guestDetails: GuestDetails
+}
+
 input UserCreateUpdateRequest{
     user: UserInput
 }
@@ -103,6 +139,10 @@ input HostCreateUpdateRequest{
 
 input GuestCreateUpdateRequest{
     guest: GuestInput
+}
+
+input ReservationCreateUpdateRequest{
+    reservation: ReservationInput
 }
 
 input UserInput{
@@ -136,6 +176,18 @@ input GuestInput{
     numChildrean: Int
     crib: Boolean
     notes: String
+}
+
+input ReservationInput{
+    id: ID #remove?
+    reservationId: String
+    hostId: String
+    guestId: String
+    startDate: String
+    endDate: String
+    notes: String
+    createDate: String
+    lastUpdated: String
 }
 
 type Phone {
@@ -193,6 +245,3 @@ enum ContactMethod {
     PHONE
     EMAIL
 }
-
-
-

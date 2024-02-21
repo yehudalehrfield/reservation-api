@@ -35,6 +35,7 @@ public class HostController {
                 .cache();
     }
 
+
     @QueryMapping
     public Mono<HostSearchResponse> getHostById(@Argument String hostId, @Argument boolean includeUserInfo) {
         ResLogger resLogger = new ResLogger(System.currentTimeMillis(), HttpMethod.POST, "getHostById");
@@ -76,22 +77,6 @@ public class HostController {
                 })
                 .cache();
     }
-
-    // @MutationMapping
-    // public Mono<HostCreateUpdateResponse> createUpdateHost(@Argument
-    // HostCreateUpdateRequest hostCreateUpdateRequest){
-    // ResLogger resLogger = new ResLogger(System.currentTimeMillis(),
-    // HttpMethod.POST, "createUpdateHost");
-    // return hostService.createUpdateHost(hostCreateUpdateRequest)
-    // .doOnSuccess(res -> resLogger.setValuesToLogger(HttpStatus.OK,
-    // res.toString()))
-    // .onErrorResume(error -> {
-    // resLogger.setValuesToLogger(HttpStatus.INTERNAL_SERVER_ERROR,
-    // error.getMessage());
-    // return Mono.error(error);
-    // })
-    // .cache();
-    // }
 
     private static Mono<HostSearchResponse> returnNotFound(ResLogger resLogger, String message) {
         resLogger.setValuesToLogger(HttpStatus.NOT_FOUND, null);
