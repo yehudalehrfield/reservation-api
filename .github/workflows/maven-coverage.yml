@@ -31,5 +31,10 @@ jobs:
             ${{ github.workspace }}/**/build/reports/jacoco/prodNormalDebugCoverage/prodNormalDebugCoverage.xml,
             ${{ github.workspace }}/**/build/reports/jacoco/**/debugCoverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 40
-          min-coverage-changed-files: 60
+          min-coverage-overall: 80
+          min-coverage-changed-files: 80
+          pass-emoji: ':green_circle:'
+          fail-emoji: ':red_circle:'
+          title: Code Coverage
+          # update the comment without posting a new one
+          update-comment: true
