@@ -149,6 +149,7 @@ public class RequestValidatorService {
             validateDate(requestReservation.getStartDate());
         if (StringUtils.hasText(requestReservation.getEndDate()))
             validateDate(requestReservation.getEndDate());
+        //todo: endDate cannot be on or before startDate
     }
 
     public static boolean checkForDateConflicts(List<Reservation> reservationListForHost,

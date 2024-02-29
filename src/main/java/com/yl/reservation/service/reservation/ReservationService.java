@@ -126,6 +126,7 @@ public class ReservationService {
   public Mono<ReservationCreateUpdateResponse> updateReservation(Reservation requestReservation,
       String updateDateTime) {
     RequestValidatorService.validateUpdateReservation(requestReservation);
+    //todo: give option to find by host, guest, and start?
     return reservationRepository.findByReservationId(requestReservation.getReservationId())
         .flatMap(existingReservation -> {
           if (StringUtils.hasText(requestReservation.getStartDate())
